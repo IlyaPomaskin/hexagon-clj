@@ -21,7 +21,9 @@
         (throw (Exception. "Wrong msg format")))
         (game/dispatch-message (assoc decoded-msg :username username)))
     (catch com.fasterxml.jackson.core.JsonParseException e
-      (log/ws-error username "Can't parse json: " msg))))
+      (log/ws-error username "Can't parse json: " msg))
+    (catch Exception e
+      (log/ws-error username e))))
 
 (defn ws-handler [request]
   (let [username (-> request :params :username)]
