@@ -4,16 +4,11 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]
             [cheshire.core :as json]
-            [hexagon.log :as log]))
-
-(def PRETTY-PRINT true)
+            [hexagon.log :as log]
+            [hexagon.config :as config]))
 
 (defonce users
   (atom {}))
-
-(defonce available-boards
-  { :classic { :q 1 :w 2 }
-    :modern { :q 3 :w 4 } })
 
 (defn send-msg [type username & { :keys [error payload]
                                   :or {error nil, payload nil} }]
@@ -24,7 +19,7 @@
               (assoc base :payload payload)
               (assoc base :error error))
         channel (get-in @users [username :channel])
-        json (json/encode msg { :pretty PRETTY-PRINT })]
+        json (json/encode msg { :pretty config/PRETTY-PRINT })]
     (log/user-debug username "send" json)
     (send! channel json)))
 
@@ -43,15 +38,13 @@
   (send-msg "users-list" username :payload (keys @users)))
 
 (defn get-boards [{ username :username }]
-  (send-msg "boards" username :payload available-boards))
+  (send-msg "boards" username :payload config/available-boards))
 
-(defn get-valid-boards [boards]
-  (->> boards
-       (map #(keyword %1))
-       (filter #(contains? available-boards %1))))
+(defn board-exists [board]
+  (contains? config/available-boards board))
 
-(defn propose-game [{ src-username :username dst-username :to boards :boards }]
-  (let [valid-boards (get-valid-boards boards)]
+(defn timeout-exists [timeout]
+  (contains? config/timeouts timeout))
     (cond
       (nil? dst-username) (send-msg "propose-game" src-username :error "no username")
       (not (contains? @users dst-username)) (send-msg "propose-game" src-username :error "user not found")
