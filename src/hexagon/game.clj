@@ -2,9 +2,9 @@
   (:use compojure.core
         [org.httpkit.server :only (send!)])
   (:require [clojure.core.match :refer [match]]
+            [clojure.string :as string]
             [cheshire.core :as json]
-            [hexagon.log :as log]
-            [clojure.string :as string]))
+            [hexagon.log :as log]))
 
 (def PRETTY-PRINT true)
 
