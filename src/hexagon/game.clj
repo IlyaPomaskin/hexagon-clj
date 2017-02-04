@@ -7,6 +7,10 @@
 
 (defonce users (atom {}))
 
+(defonce available-boards
+  { :classic { :q 1 :w 2 }
+    :modern { :q 3 :w 4 } })
+
 (defn send-msg [username msg]
   (log/user-debug username "send" msg)
   (send! ;; Убрать send! в ws.clj
@@ -25,7 +29,7 @@
   (send-msg username (keys @users)))
 
 (defn get-boards [{ username :username }]
-  (send-msg username { :boards [1 2 3]}))
+  (send-msg username { :boards available-boards }))
 
 (defn dispatch-message [username msg]
   (log/user-debug username "receive" msg)
