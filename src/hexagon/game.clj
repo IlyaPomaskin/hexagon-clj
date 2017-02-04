@@ -41,36 +41,39 @@
 (defn get-boards [{ username :username }]
   (send-msg "boards" username :payload config/available-boards))
 
+(defn invite [{ src-username :username
+                dst-username :dst
+                game-settings :game-settings }]
+  (swap! users assoc-in [src-username :invites dst-username] { :game-settings game-settings
+                                                               :username src-username })
+  (send-msg "invite" dst-username :payload { :src src-username
+                                             :game-settings game-settings }))
+
 (defn board-exists [board]
   (contains? config/available-boards board))
 
 (defn timeout-exists [timeout]
   (contains? config/timeouts timeout))
 
-(defn invite [{ src-username :username
-                dst-username :dst
-                settings :settings }]
-  (swap! users assoc-in [src-username :invites dst-username] { :settings settings
-                                                               :username src-username })
-  (send-msg "invite" dst-username :payload { :src src-username
-                                             :settings settings }))
+(defn create-game-settings [{ board :board
+                              timeout :timeout
+                              is-src-first :is-src-first }]
+  { :board (if-not (board-exists board) config/default-board board)
+    :timeout (if-not (timeout-exists timeout) config/default-timeout timeout)
+    :is-src-first (boolean is-src-first) })
 
 (defn send-invite [msg]
   (let [{ src-username :username
-          dst-username :dst
-          settings :settings } msg
+          dst-username :dst } msg
+        game-settings (create-game-settings (:game-settings msg))
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
       (nil? dst-username) (src-send-err "no username")
       (not (contains? @users dst-username)) (src-send-err  "user not found")
-      (not (map? settings)) (src-send-err "wrong settings")
-      (not (board-exists (:board settings))) (src-send-err  "invalid board")
-      (not (timeout-exists (:timeout settings))) (src-send-err  "invalid timeout")
-      (not (contains? settings :is-src-first)) (src-send-err "no is-src-first")
       (= src-username dst-username) (src-send-err  "wrong user")
       (true? (get-in @users [dst-username :is-playing])) (src-send-err  "user already playing")
       ;; limit invites?
-      :else (invite msg))))
+      :else (invite (assoc msg :game-settings game-settings)))))
 
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
