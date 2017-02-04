@@ -2,13 +2,14 @@
   (:use compojure.core
         [org.httpkit.server :only (send!)])
   (:require [clojure.core.match :refer [match]]
+            [cheshire.core :as json]
             [hexagon.log :as log]))
 
 (defonce users (atom {}))
 
 (defn send-msg [username msg]
   (log/user-debug username "send" msg)
-  (send!
+  (send! ;; Убрать send! в ws.clj
     (get-in @users [username :channel])
     (json/encode msg)))
 
