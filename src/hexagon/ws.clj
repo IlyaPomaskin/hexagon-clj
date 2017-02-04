@@ -11,7 +11,7 @@
   (game/create-user username channel))
 
 (defn handle-close [username status]
-  (log/ws-info "close" status)
+  (log/ws-info username "close" status)
   (game/remove-user username))
 
 (defn handle-receive [username msg]
@@ -24,15 +24,11 @@
       (log/ws-error username "Can't parse json: " msg))))
 
 (defn ws-handler [request]
-  (let [username (-> request :params :username)
-        has-username (not (string/blank? username))
-        is-websocket (:websocket? request)]
-    (when-not has-username
-      (log/ws-error "username is blank"))
-    (when-not is-websocket
-      (log/ws-error username "not ws"))
-    (when (and has-username is-websocket)
-      (with-channel request channel
+  (let [username (-> request :params :username)]
+    (cond
+      (nil? username) (log/ws-error "username is blank")
+      (not (:websocket? request)) (log/ws-error username "not ws")
+      :else (with-channel request channel
         (handle-connect username channel)
         (on-receive channel #(handle-receive username %1))
         (on-close channel #(handle-close username %1))))))
