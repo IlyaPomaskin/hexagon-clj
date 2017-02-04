@@ -8,9 +8,6 @@
             [hexagon.config :as config]
             [hexagon.entities :as entities]))
 
-(defonce users
-  (atom {}))
-
 (defn send-msg [type username & { :keys [error payload]
                                   :or {error nil, payload nil} }]
   (let [base { :type type
@@ -19,21 +16,21 @@
         msg (if (nil? error)
               (assoc base :payload payload)
               (assoc base :error error))
-        channel (get-in @users [username :channel])
+        channel (entities/get-in-users [username :channel])
         json (json/encode msg { :pretty config/PRETTY-PRINT })]
     (log/user-debug username "send" json)
     (send! channel json)))
 
 (defn add-user [username channel]
-  (log/user-info username "added")
-  (swap! users assoc username (entities/create-user username channel)))
+  (log/game-info username " enter")
+  (entities/add-user username channel))
 
 (defn delete-user [username]
-  (log/user-info username "deleted")
-  (swap! users dissoc username))
+  (log/game-info username " exit")
+  (entities/delete-user username))
 
 (defn get-users-list [{ username :username }]
-  (send-msg "users-list" username :payload (keys @users)))
+  (send-msg "users-list" username :payload (entities/get-usernames)))
 
 (defn get-boards [{ username :username }]
   (send-msg "boards" username :payload entities/available-boards))
@@ -53,9 +50,9 @@
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
       (nil? dst-username) (src-send-err "no username")
-      (not (contains? @users dst-username)) (src-send-err  "user not found")
+      (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (true? (get-in @users [dst-username :is-playing])) (src-send-err  "user already playing")
+      (true? (entities/get-in-users [dst-username :is-playing])) (src-send-err  "user already playing")
       ;; limit invites?
       :else (invite (assoc msg :game-settings game-settings)))))
 

@@ -9,6 +9,7 @@
   (first (keys available-boards)))
 
 ;;timeouts
+
 (defonce timeouts
   #{60 90 120 180 300})
 
@@ -17,6 +18,29 @@
 
 ;; users
 
+(defonce users
+  (atom {}))
+
+(defn get-in-users [path default-value]
+  (get-in @users path default-value))
+
+(defn assoc-in-users [path value]
+  (swap! users assoc-in path value))
+
+(defn update-in-users [path fn]
+  (swap! users update-in path fn))
+
+(defn add-user [username channel]
+  (assoc-in-users [username] (create-user username channel)))
+
+(defn delete-user [username]
+  (swap! users dissoc username))
+
+(defn user-exists? [username]
+  (contains? @users username))
+
+(defn get-usernames []
+  (keys @users))
 
 ;; user
 
