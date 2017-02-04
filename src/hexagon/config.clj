@@ -8,3 +8,9 @@
 
 (defonce timeouts
   #{60 90 120 180 300})
+
+(defonce default-board
+  (first (keys available-boards)))
+
+(defonce default-timeout
+  (first timeouts))
