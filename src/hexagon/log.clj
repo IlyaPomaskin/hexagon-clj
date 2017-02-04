@@ -2,7 +2,12 @@
   (:use compojure.core)
   (:require [clojure.string :as string]))
 
-(defn log [channel level] (fn [& args] (println (str "[" channel "] " level ": ") (string/join " " args))))
+(defn now []
+  (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss") (new java.util.Date)))
+
+(defn log [channel level]
+  (fn [& args]
+    (println (format "[%s] [%s] %s: %s" (now) channel level (string/join " " args)))))
 
 (def ws-info (log "ws" "INFO"))
 (def ws-error (log "ws" "ERR"))
