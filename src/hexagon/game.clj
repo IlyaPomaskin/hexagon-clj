@@ -3,7 +3,8 @@
         [org.httpkit.server :only (send!)])
   (:require [clojure.core.match :refer [match]]
             [cheshire.core :as json]
-            [hexagon.log :as log]))
+            [hexagon.log :as log]
+            [clojure.string :as string]))
 
 (def PRETTY-PRINT true)
 
@@ -26,13 +27,24 @@
     (log/user-debug username "send" msg)
     (send! channel (json/encode msg { :pretty PRETTY-PRINT }))))
 
+(defn is-empty-string [string]
+  (and (string? string) (string/blank? string)))
+
+(defn string-to-keyword [string]
+  (if (or (is-empty-string string) (nil? string))
+    nil
+    (keyword (str string))))
+
 (defn create-user [username channel]
   (log/user-info username "added")
-  (swap! users assoc username { :username username :channel channel }))
+  (swap! users assoc (string-to-keyword username)
+         { :username username
+           :channel channel
+           :is-playing false }))
 
 (defn remove-user [username]
   (log/user-info username "deleted")
-  (swap! users dissoc username))
+  (swap! users dissoc (string-to-keyword username)))
 
 (defn get-users-list [{ username :username }]
   (send-msg "users-list" username :payload (keys @users)))
