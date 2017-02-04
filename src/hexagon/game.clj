@@ -23,17 +23,10 @@
         msg (if (nil? error)
               (assoc base :payload payload)
               (assoc base :error error))
-        channel (get-in @users [username :channel])]
-    (log/user-debug username "send" msg)
-    (send! channel (json/encode msg { :pretty PRETTY-PRINT }))))
-
-(defn is-empty-string [string]
-  (and (string? string) (string/blank? string)))
-
-(defn string-to-keyword [string]
-  (if (or (is-empty-string string) (nil? string))
-    nil
-    (keyword (str string))))
+        channel (get-in @users [username :channel])
+        json (json/encode msg { :pretty PRETTY-PRINT })]
+    (log/user-debug username "send" json)
+    (send! channel json)))
 
 (defn create-user [username channel]
   (log/user-info username "added")
