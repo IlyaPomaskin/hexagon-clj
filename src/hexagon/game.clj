@@ -30,14 +30,14 @@
 
 (defn create-user [username channel]
   (log/user-info username "added")
-  (swap! users assoc (string-to-keyword username)
+  (swap! users assoc username
          { :username username
            :channel channel
            :is-playing false }))
 
 (defn remove-user [username]
   (log/user-info username "deleted")
-  (swap! users dissoc (string-to-keyword username)))
+  (swap! users dissoc username))
 
 (defn get-users-list [{ username :username }]
   (send-msg "users-list" username :payload (keys @users)))
