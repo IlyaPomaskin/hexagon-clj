@@ -5,7 +5,8 @@
             [clojure.string :as string]
             [cheshire.core :as json]
             [hexagon.log :as log]
-            [hexagon.config :as config]))
+            [hexagon.config :as config]
+            [hexagon.entities :as entities]))
 
 (defonce users
   (atom {}))
@@ -23,15 +24,11 @@
     (log/user-debug username "send" json)
     (send! channel json)))
 
-(defn create-user [username channel]
+(defn add-user [username channel]
   (log/user-info username "added")
-  (swap! users assoc username
-         { :username username
-           :channel channel
-           :is-playing false
-           :invites {} }))
+  (swap! users assoc username (entities/create-user username channel)))
 
-(defn remove-user [username]
+(defn delete-user [username]
   (log/user-info username "deleted")
   (swap! users dissoc username))
 
@@ -39,7 +36,7 @@
   (send-msg "users-list" username :payload (keys @users)))
 
 (defn get-boards [{ username :username }]
-  (send-msg "boards" username :payload config/available-boards))
+  (send-msg "boards" username :payload entities/available-boards))
 
 (defn invite [{ src-username :username
                 dst-username :dst
@@ -49,23 +46,10 @@
   (send-msg "invite" dst-username :payload { :src src-username
                                              :game-settings game-settings }))
 
-(defn board-exists [board]
-  (contains? config/available-boards board))
-
-(defn timeout-exists [timeout]
-  (contains? config/timeouts timeout))
-
-(defn create-game-settings [{ board :board
-                              timeout :timeout
-                              is-src-first :is-src-first }]
-  { :board (if-not (board-exists board) config/default-board board)
-    :timeout (if-not (timeout-exists timeout) config/default-timeout timeout)
-    :is-src-first (boolean is-src-first) })
-
 (defn send-invite [msg]
   (let [{ src-username :username
           dst-username :dst } msg
-        game-settings (create-game-settings (:game-settings msg))
+        game-settings (entities/create-game-settings (:game-settings msg))
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
       (nil? dst-username) (src-send-err "no username")

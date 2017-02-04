@@ -8,11 +8,11 @@
 
 (defn handle-connect [username channel]
   (log/ws-info username "connected")
-  (game/create-user username channel))
+  (game/add-user username channel))
 
 (defn handle-close [username status]
   (log/ws-info username "close" status)
-  (game/remove-user username))
+  (game/delete-user username))
 
 (defn handle-receive [username msg]
   (try
