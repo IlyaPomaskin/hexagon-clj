@@ -5,17 +5,26 @@
             [cheshire.core :as json]
             [hexagon.log :as log]))
 
-(defonce users (atom {}))
+(def PRETTY-PRINT true)
+
+(defonce users
+  (atom {}))
 
 (defonce available-boards
   { :classic { :q 1 :w 2 }
     :modern { :q 3 :w 4 } })
 
-(defn send-msg [username msg]
-  (log/user-debug username "send" msg)
-  (send! ;; Убрать send! в ws.clj
-    (get-in @users [username :channel])
-    (json/encode msg)))
+(defn send-msg [type username & { :keys [error payload]
+                                  :or {error nil, payload nil} }]
+  (let [base { :type type
+               :timestamp (System/currentTimeMillis)
+               :status (if (nil? error) "OK" "ERR") }
+        msg (if (nil? error)
+              (assoc base :payload payload)
+              (assoc base :error error))
+        channel (get-in @users [username :channel])]
+    (log/user-debug username "send" msg)
+    (send! channel (json/encode msg { :pretty PRETTY-PRINT }))))
 
 (defn create-user [username channel]
   (log/user-info username "added")
@@ -26,10 +35,10 @@
   (swap! users dissoc username))
 
 (defn get-users-list [{ username :username }]
-  (send-msg username (keys @users)))
+  (send-msg "users-list" username :payload (keys @users)))
 
 (defn get-boards [{ username :username }]
-  (send-msg username { :boards available-boards }))
+  (send-msg "boards" username :payload available-boards))
 
 (defn dispatch-message [username msg]
   (log/user-debug username "receive" msg)
