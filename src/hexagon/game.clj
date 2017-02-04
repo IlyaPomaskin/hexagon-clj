@@ -28,7 +28,8 @@
   (swap! users assoc username
          { :username username
            :channel channel
-           :is-playing false }))
+           :is-playing false
+           :invites {} }))
 
 (defn remove-user [username]
   (log/user-info username "deleted")
@@ -45,21 +46,38 @@
 
 (defn timeout-exists [timeout]
   (contains? config/timeouts timeout))
+
+(defn invite [{ src-username :username
+                dst-username :dst
+                settings :settings }]
+  (swap! users assoc-in [src-username :invites dst-username] { :settings settings
+                                                               :username src-username })
+  (send-msg "invite" dst-username :payload { :src src-username
+                                             :settings settings }))
+
+(defn send-invite [msg]
+  (let [{ src-username :username
+          dst-username :dst
+          settings :settings } msg
+        src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
-      (nil? dst-username) (send-msg "propose-game" src-username :error "no username")
-      (not (contains? @users dst-username)) (send-msg "propose-game" src-username :error "user not found")
-      (empty? valid-boards) (send-msg "propose-game" src-username :error "no boards")
-      (= src-username dst-username) (send-msg "propose-game" src-username :error "wrong user")
-      (true? (get-in @users [dst-username :is-playing])) (send-msg "propose-game" src-username :error "user already playing")
-      ;; limit proposals?
-      :else (send-msg "game-proposal" dst-username :payload { :from src-username :boards valid-boards }))))
+      (nil? dst-username) (src-send-err "no username")
+      (not (contains? @users dst-username)) (src-send-err  "user not found")
+      (not (map? settings)) (src-send-err "wrong settings")
+      (not (board-exists (:board settings))) (src-send-err  "invalid board")
+      (not (timeout-exists (:timeout settings))) (src-send-err  "invalid timeout")
+      (not (contains? settings :is-src-first)) (src-send-err "no is-src-first")
+      (= src-username dst-username) (src-send-err  "wrong user")
+      (true? (get-in @users [dst-username :is-playing])) (src-send-err  "user already playing")
+      ;; limit invites?
+      :else (invite msg))))
 
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
   (match [msg]
          [{ :type "get-users-list" }] (get-users-list msg)
          [{ :type "get-boards" }] (get-boards msg)
-         [{ :type "propose-game" }] (propose-game msg)
+         [{ :type "send-invite" }] (send-invite msg)
 ;;          [{ :type "confirm-proposal" }] (confirm-proposal msg)
 ;;          [{ :type "cancel-proposal" }] (cancel-proposal msg)
 ;;          [{ :type "start-game" }] (start-game msg)
