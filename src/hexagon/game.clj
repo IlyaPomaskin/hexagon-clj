@@ -45,11 +45,26 @@
 (defn get-boards [{ username :username }]
   (send-msg "boards" username :payload available-boards))
 
-(defn dispatch-message [username msg]
-  (log/user-debug username "receive" msg)
+(defn get-valid-boards [boards]
+  (->> boards
+       (map #(keyword %1))
+       (filter #(contains? available-boards %1))))
+
+(defn propose-game [{ src-username :username dst-username :to boards :boards }]
+  (let [valid-boards (get-valid-boards boards)]
+    (cond
+      (nil? dst-username) (send-msg "propose-game" src-username :error "no username")
+      (not (contains? @users dst-username)) (send-msg "propose-game" src-username :error "user not found")
+      (empty? valid-boards) (send-msg "propose-game" src-username :error "no boards")
+      (= src-username dst-username) (send-msg "propose-game" src-username :error "wrong user")
+      (true? (get-in @users [dst-username :is-playing])) (send-msg "propose-game" src-username :error "user already playing")
+      ;; limit proposals?
+      :else (send-msg "game-proposal" dst-username :payload { :from src-username :boards valid-boards }))))
+
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
   (match [msg]
          [{ :type "get-users-list" }] (get-users-list msg)
          [{ :type "get-boards" }] (get-boards msg)
+         [{ :type "propose-game" }] (propose-game msg)
          :else (log/user-error (:username msg) "unknown message" (:type msg))))
