@@ -20,15 +20,17 @@
   (log/user-info username "deleted")
   (swap! users dissoc username))
 
-(defn get-users-list [username]
-  (send-msg username { :smth 123 }))
+(defn get-users-list [{ username :username }]
+  (send-msg username (keys @users)))
 
-(defn get-boards [username]
+(defn get-boards [{ username :username }]
   (send-msg username { :boards [1 2 3]}))
 
 (defn dispatch-message [username msg]
   (log/user-debug username "receive" msg)
+(defn dispatch-message [msg]
+  (log/user-debug (:username msg) "receive" msg)
   (match [msg]
-         [{ :type "get-users-list" }] (get-users-list username)
-         [{ :type "get-boards" }] (get-boards username)
-         :else (log/user-error username "unknown message" (:type msg))))
+         [{ :type "get-users-list" }] (get-users-list msg)
+         [{ :type "get-boards" }] (get-boards msg)
+         :else (log/user-error (:username msg) "unknown message" (:type msg))))

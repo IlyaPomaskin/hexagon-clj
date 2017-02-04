@@ -16,7 +16,10 @@
 
 (defn handle-receive [username msg]
   (try
-    (game/dispatch-message username (json/parse-string msg true))
+    (let [decoded-msg (json/parse-string msg true)]
+      (when-not (map? decoded-msg)
+        (throw (Exception. "Wrong msg format")))
+        (game/dispatch-message (assoc decoded-msg :username username)))
     (catch com.fasterxml.jackson.core.JsonParseException e
       (log/ws-error username "Can't parse json: " msg))))
 
