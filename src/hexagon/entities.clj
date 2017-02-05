@@ -21,8 +21,9 @@
 (defonce users
   (atom {}))
 
-(defn get-in-users [path default-value]
-  (get-in @users path default-value))
+(defn get-in-users
+  ([path] (get-in @users path))
+  ([path default-value] (get-in @users path default-value)))
 
 (defn assoc-in-users [path value]
   (swap! users assoc-in path value))
