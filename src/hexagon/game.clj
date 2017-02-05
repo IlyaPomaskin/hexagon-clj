@@ -18,7 +18,7 @@
               (assoc base :error error))
         channel (entities/get-in-users [username :channel])
         json (json/encode msg { :pretty config/PRETTY-PRINT })]
-    (log/user-debug username "send" json)
+    (log/ws-debug username "send" json)
     (send! channel json)))
 
 (defn add-user [username channel]
