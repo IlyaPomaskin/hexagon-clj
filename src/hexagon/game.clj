@@ -57,15 +57,32 @@
       ;; limit invites?
       :else (invite (assoc msg :game-settings game-settings)))))
 
+(defn start-game [src-username dst-username game-settings]
+;;   (entities/assoc-in-users [src-username :invites dst-username] { :game-settings game-settings
+;;                                                                   :username src-username })
+;;   (entities/update-in-users [src-username] (fn [user] ...))
+;;   (entities/assoc-in-users ))
+  (log/game-info "start-game"))
+
+(defn accept-invite [msg]
+  (let [{ src-username :username
+          dst-username :dst } msg
+        src-send-err (partial send-msg "accept-invite" src-username :error)]
+    (cond
+      (nil? dst-username) (src-send-err "no username")
+      (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
+      (= src-username dst-username) (src-send-err  "wrong user")
+      (true? (entities/get-in-users [dst-username :is-playing])) (src-send-err  "user already playing")
+      (nil? (entities/get-in-users [dst-username :invites src-username])) (src-send-err "user canceled invite")
+      :else (start-game src-username dst-username (entities/get-in-users [dst-username :invites src-username :game-settings])))))
+
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
   (match [msg]
          [{ :type "get-users-list" }] (get-users-list msg)
          [{ :type "get-boards" }] (get-boards msg)
          [{ :type "send-invite" }] (send-invite msg)
-;;          [{ :type "confirm-proposal" }] (confirm-proposal msg)
-;;          [{ :type "cancel-proposal" }] (cancel-proposal msg)
-;;          [{ :type "start-game" }] (start-game msg)
+         [{ :type "accept-invite" }] (accept-invite msg)
 ;;          [{ :type "make-move" }] (make-move msg)
 ;;          [{ :type "finish-game" }] (finish-game msg)
          :else (log/user-error (:username msg) "unknown message" (:type msg))))
