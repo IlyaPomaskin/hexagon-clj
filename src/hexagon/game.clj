@@ -8,10 +8,11 @@
             [hexagon.config :as config]
             [hexagon.entities :as entities]))
 
-(defn send-msg [type username & { :keys [error payload]
+(defn send-msg [type username parent-msg-id & { :keys [error payload]
                                   :or {error nil, payload nil} }]
   (let [base { :type type
                :timestamp (System/currentTimeMillis)
+               :parent-msg-id parent-msg-id
                :status (if (nil? error) "OK" "ERR") }
         msg (if (nil? error)
               (assoc base :payload payload)
