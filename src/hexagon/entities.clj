@@ -16,6 +16,14 @@
 (defonce default-timeout
   (first timeouts))
 
+;; user
+
+(defn create-user [username channel]
+  { :username username
+    :channel channel
+    :is-playing false
+    :invites {} })
+
 ;; users
 
 (defonce users
@@ -42,14 +50,6 @@
 
 (defn get-usernames []
   (keys @users))
-
-;; user
-
-(defn create-user [username channel]
-  { :username username
-    :channel channel
-    :is-playing false
-    :invites {} })
 
 ;; game-settings
 
