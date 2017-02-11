@@ -39,8 +39,8 @@
 (defn invite [{ src-username :username
                 dst-username :dst
                 game-settings :game-settings }]
-  (swap! users assoc-in [src-username :invites dst-username] { :game-settings game-settings
-                                                               :username src-username })
+  (entities/assoc-in-users [src-username :invites dst-username] { :game-settings game-settings
+                                                                  :username src-username })
   (send-msg "invite" dst-username :payload { :src src-username
                                              :game-settings game-settings }))
 
