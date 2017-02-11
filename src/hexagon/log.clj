@@ -11,6 +11,7 @@
 
 (def ws-info (log "ws" "INFO"))
 (def ws-error (log "ws" "ERR"))
+(def ws-debug (log "ws" "DEBUG"))
 (def user-info (log "user" "INFO"))
 (def user-error (log "user" "ERR"))
 (def user-debug (log "user" "DEBUG"))
