@@ -1,28 +1,21 @@
-(ns hexagon.entities)
+(ns hexagon.entities
+  (:require [datascript.core :as d]
+            [hexagon.db :refer [db]]))
 
 ;; boards
-(defonce available-boards
-  { "classic" { :q 1 :w 2 }
-    "modern" { :q 3 :w 4 } })
 
-(defonce default-board
-  (first (keys available-boards)))
+(d/transact! db [{ :board/name "classic"
+                   :board/map [{ :x 1
+                                 :y 2 }]}
+                 { :board/name "modern"
+                   :board/map [{ :x 2
+                                 :y 1 }]}])
 
 ;;timeouts
 
-(defonce timeouts
-  #{60 90 120 180 300})
-
-(defonce default-timeout
-  (first timeouts))
-
-;; user
-
-(defn create-user [username channel]
-  { :username username
-    :channel channel
-    :is-playing false
-    :invites {} })
+(d/transact! db [{ :timeout/seconds 60 }
+                 { :timeout/seconds 90 }
+                 { :timeout/seconds 120 }])
 
 ;; users
 

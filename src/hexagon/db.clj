@@ -8,10 +8,12 @@
     :user/playing? {}
     :user/invites { :db/valueType :db.type/ref
                     :db/cardinality :db.cardinality/many }
-    :board/name {}
+    :board/name { :db/cardinality :db.cardinality/one
+                  :db/unique :db.unique/value }
     :board/map {}
+    :timeout/seconds {}
     :game-settings/board { :db/valueType :db.type/ref }
-    :game-settings/timeout {}
+    :game-settings/timeout { :db/valueType :db.type/ref }
     :game-settings/src-firstmove? {}
     :invite/from { :db/valueType :db.type/ref }
     :invite/to { :db/valueType :db.type/ref }
