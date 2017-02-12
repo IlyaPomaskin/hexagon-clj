@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/core.match "0.3.0-alpha4"]
+                 [datascript "0.15.5"]
 ;;                  [org.clojure/clojurescript "1.9.293"]
                  [javax.servlet/servlet-api "2.5"]
                  [http-kit "2.2.0"]
