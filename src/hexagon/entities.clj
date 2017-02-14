@@ -1,6 +1,6 @@
 (ns hexagon.entities
   (:require [datascript.core :as d]
-            [hexagon.db :refer [db]]))
+            [hexagon.db :as db :refer [db]]))
 
 ;; boards
 
@@ -19,30 +19,30 @@
 
 ;; users
 
-(defonce users
-  (atom {}))
+;; (defn get-in-users
+;;   ([path] (get-in @users path))
+;;   ([path default-value] (get-in @users path default-value)))
 
-(defn get-in-users
-  ([path] (get-in @users path))
-  ([path default-value] (get-in @users path default-value)))
+;; (defn assoc-in-users [path value]
+;;   (swap! users assoc-in path value))
 
-(defn assoc-in-users [path value]
-  (swap! users assoc-in path value))
-
-(defn update-in-users [path fn]
-  (swap! users update-in path fn))
+;; (defn update-in-users [path fn]
+;;   (swap! users update-in path fn))
 
 (defn add-user [username channel]
-  (assoc-in-users [username] (create-user username channel)))
+  (d/transact! db [{ :user/name username
+                     :user/channel channel
+                     :user/playing? false }]))
 
 (defn delete-user [username]
-  (swap! users dissoc username))
+  (db/retract-by-av :user/name username))
 
 (defn user-exists? [username]
-  (contains? @users username))
+  (not (nil? (db/eid-by-av :user/name username))))
 
 (defn get-usernames []
-  (keys @users))
+  (d/q '[:find [?name ...]
+         :where [_ :user/name ?name]] @db))
 
 ;; game-settings
 
