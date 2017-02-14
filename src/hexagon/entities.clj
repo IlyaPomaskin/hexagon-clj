@@ -11,11 +11,15 @@
                    :board/map [{ :x 2
                                  :y 1 }]}])
 
+(def default-board (db/eid-by-av :board/name "classic"))
+
 ;;timeouts
 
 (d/transact! db [{ :timeout/seconds 60 }
                  { :timeout/seconds 90 }
                  { :timeout/seconds 120 }])
+
+(def default-timeout (db/eid-by-av :timeout/seconds 90))
 
 ;; users
 
@@ -47,14 +51,14 @@
 ;; game-settings
 
 (defn board-exists [board]
-  (contains? available-boards board))
+  (not (nil? (db/eid-by-av :board/name board))))
 
 (defn timeout-exists [timeout]
-  (contains? timeouts timeout))
+  (not (nil? (db/eid-by-av :timeout/seconds timeout))))
 
 (defn create-game-settings [{ board :board
                               timeout :timeout
-                              is-src-first :is-src-first }]
-  { :board (if-not (board-exists board) default-board board)
-    :timeout (if-not (timeout-exists timeout) default-timeout timeout)
-    :is-src-first (boolean is-src-first) })
+                              src-first-move? :is-src-first }]
+  (d/transact! db [{ :game-settings/board (if-not (board-exists board) default-board board)
+                     :game-settings/timeout (if-not (timeout-exists timeout) default-timeout timeout)
+                     :game-settings/src-first-move? (boolean src-first-move?) }]))
