@@ -13,6 +13,16 @@
 
 (def default-board (db/eid-by-av :board/name "classic"))
 
+;; TODO return map instead of vec
+(defn get-boards []
+  (d/q '[:find ?name ?map
+         :where
+         [_ :board/name ?name]
+         [_ :board/map ?map]] @db))
+
+(defn board-exists [board]
+  (not (nil? (db/eid-by-av :board/name board))))
+
 ;;timeouts
 
 (d/transact! db [{ :timeout/seconds 60 }
@@ -20,6 +30,9 @@
                  { :timeout/seconds 120 }])
 
 (def default-timeout (db/eid-by-av :timeout/seconds 90))
+
+(defn timeout-exists [timeout]
+  (not (nil? (db/eid-by-av :timeout/seconds timeout))))
 
 ;; users
 
@@ -56,6 +69,12 @@
 
 ;; invites
 
+(defn add-invite [from to settings]
+  (d/transact! db [(assoc (create-game-settings settings) :db/id -1)
+                   { :invite/to to
+                     :invite/from from
+                     :invite/settings -1 }]))
+
 (defn invite-exists? [from to]
   (not (nil? (get-invite from to))))
 
@@ -67,15 +86,9 @@
 
 ;; game-settings
 
-(defn board-exists [board]
-  (not (nil? (db/eid-by-av :board/name board))))
-
-(defn timeout-exists [timeout]
-  (not (nil? (db/eid-by-av :timeout/seconds timeout))))
-
 (defn create-game-settings [{ board :board
                               timeout :timeout
                               src-first-move? :is-src-first }]
-  (d/transact! db [{ :game-settings/board (if-not (board-exists board) default-board board)
-                     :game-settings/timeout (if-not (timeout-exists timeout) default-timeout timeout)
-                     :game-settings/src-first-move? (boolean src-first-move?) }]))
+  { :game-settings/board (if-not (board-exists board) default-board board)
+    :game-settings/timeout (if-not (timeout-exists timeout) default-timeout timeout)
+    :game-settings/src-first-move? (boolean src-first-move?) })
