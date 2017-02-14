@@ -57,11 +57,12 @@
       :else (invite (assoc msg :game-settings game-settings)))))
 
 (defn start-game [invite]
+  ;; TODO
   (log/game-info "start-game" invite))
 
 (defn accept-invite [msg]
   (let [{ src-username :username
-          dst-username :dst } msg
+          dst-username :dst }
         src-send-err (partial send-msg "accept-invite" src-username :error)]
     (cond
       (nil? dst-username) (src-send-err "no username")
