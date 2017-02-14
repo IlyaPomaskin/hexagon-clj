@@ -17,7 +17,7 @@
         msg (if (nil? error)
               (assoc base :payload payload)
               (assoc base :error error))
-        channel (entities/get-in-users [username :channel])
+        channel (:channel (entities/get-user username))
         json (json/encode msg { :pretty config/PRETTY-PRINT })]
     (log/ws-debug username "send" json)
     (send! channel json)))
@@ -34,13 +34,12 @@
   (send-msg "users-list" username :payload (entities/get-usernames)))
 
 (defn get-boards [{ username :username }]
-  (send-msg "boards" username :payload entities/available-boards))
+  (send-msg "boards" username :payload entities/get-boards))
 
 (defn invite [{ src-username :username
                 dst-username :dst
                 game-settings :game-settings }]
-  (entities/assoc-in-users [src-username :invites dst-username] { :game-settings game-settings
-                                                                  :username src-username })
+  (entities/add-invite src-username dst-username game-settings)
   (send-msg "invite" dst-username :payload { :src src-username
                                              :game-settings game-settings }))
 
@@ -53,16 +52,12 @@
       (nil? dst-username) (src-send-err "no username")
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (true? (entities/get-in-users [dst-username :is-playing])) (src-send-err  "user already playing")
+      (entities/user-playing? dst-username) (src-send-err  "user already playing")
       ;; limit invites?
       :else (invite (assoc msg :game-settings game-settings)))))
 
-(defn start-game [src-username dst-username game-settings]
-;;   (entities/assoc-in-users [src-username :invites dst-username] { :game-settings game-settings
-;;                                                                   :username src-username })
-;;   (entities/update-in-users [src-username] (fn [user] ...))
-;;   (entities/assoc-in-users ))
-  (log/game-info "start-game"))
+(defn start-game [invite]
+  (log/game-info "start-game" invite))
 
 (defn accept-invite [msg]
   (let [{ src-username :username
@@ -72,9 +67,9 @@
       (nil? dst-username) (src-send-err "no username")
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (true? (entities/get-in-users [dst-username :is-playing])) (src-send-err  "user already playing")
-      (nil? (entities/get-in-users [dst-username :invites src-username])) (src-send-err "user canceled invite")
-      :else (start-game src-username dst-username (entities/get-in-users [dst-username :invites src-username :game-settings])))))
+      (entities/user-playing? dst-username) (src-send-err  "user already playing")
+      (entities/user-invited? src-username dst-username) (src-send-err "user canceled invite")
+      :else (start-game (entities/get-invite dst-username src-username)))))
 
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
