@@ -33,6 +33,9 @@
 ;; (defn update-in-users [path fn]
 ;;   (swap! users update-in path fn))
 
+(defn get-user [username]
+  (db/entity-by-av :user/name username))
+
 (defn add-user [username channel]
   (d/transact! db [{ :user/name username
                      :user/channel channel
@@ -47,6 +50,20 @@
 (defn get-usernames []
   (d/q '[:find [?name ...]
          :where [_ :user/name ?name]] @db))
+
+(defn user-playing? [username]
+  (:playing? (db/entity-by-av :user/name username)))
+
+;; invites
+
+(defn invite-exists? [from to]
+  (not (nil? (get-invite from to))))
+
+(defn get-invite [from to]
+  (d/q '[:find ?e .
+           :where
+           [?e :invite/from (db/eid-by-av :user/name src)]
+           [?e :invite/to (db/eid-by-av :user/name dst)]] @db))
 
 ;; game-settings
 
