@@ -6,10 +6,12 @@
 
 (d/transact! db [{ :board/name "classic"
                    :board/map [{ :x 1
-                                 :y 2 }]}
+                                 :y 2
+                                 :owner :none }]}
                  { :board/name "modern"
                    :board/map [{ :x 2
-                                 :y 1 }]}])
+                                 :y 1
+                                 :owner :none }]}])
 
 (def default-board (db/eid-by-av :board/name "classic"))
 
@@ -104,3 +106,16 @@
     { :game-settings/board board-eid
       :game-settings/timeout board-eid
       :game-settings/src-first-move? src-first-move? }))
+
+;; game
+
+(defn start-game [{ from :invite/from
+                    to :invite/to
+                    settings :invite/settings }]
+  (let [blue (if (:game-settings/src-first-move? settings) from to)
+        red (if (:game-settings/src-first-move? settings) to from)
+        board (:game-settings/board settings)]
+    (d/transact! db [{ :game/blue blue
+                       :game/red red
+                       :game/settings settings
+                       :game/board board }])))
