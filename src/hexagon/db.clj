@@ -15,9 +15,15 @@
     :game-settings/board { :db/valueType :db.type/ref }
     :game-settings/timeout { :db/valueType :db.type/ref }
     :game-settings/src-first-move? {}
-    :invite/from { :db/valueType :db.type/ref }
-    :invite/to { :db/valueType :db.type/ref }
-    :invite/settings { :db/valueType :db.type/ref }})
+    :invite/from { :db/valueType :db.type/ref
+                   :db/unique :db.unique/identity }
+    :invite/to { :db/valueType :db.type/ref
+                 :db/unique :db.unique/identity }
+    :invite/settings { :db/valueType :db.type/ref }
+    :game/blue { :db/valueType :db.type/ref }
+    :game/red { :db/valueType :db.type/ref }
+    :game/settings { :db/valueType :db.type/ref }
+    :game/board {}})
 
 (def db (d/create-conn schema))
 
