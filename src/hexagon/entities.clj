@@ -57,6 +57,9 @@
 (defn get-user [username]
   (db/entity-by-av :user/name username))
 
+(defn get-user-eid [username]
+  (db/eid-by-av :user/name username))
+
 (defn add-user [username channel]
   (d/transact! db [{ :user/name username
                      :user/channel channel
@@ -121,4 +124,47 @@
                        :game/settings settings
                        :game/map (:board/map board)
                        :game/turn blue }])))
+
+(defn get-game [owner-username]
+  (let [owner-eid (get-user-eid owner-username)]
+    (db/entity-by-av :game/owner owner-username)))
+
+(defn get-game-settings [game]
+  (db/entity-by-eid (:game/settings game)))
+
+(defn get-user-color [game username]
+  (let [settings (get-game-settings game)
+        user-eid (get-user-eid username)]
+    (if (and (= (:game/owner game) user-eid)
+             (:game-settings/owner-first-move? settings))
+      :blue
+      :red)))
+
+(defn get-cell [map x y]
+  (first (filterv (fn [{ cell-x :x
+                         cell-y :y }]
+                    (and (= cell-x x) (= cell-y y)))
+                  map)))
+
+(get-cell [{ :x 1 :y 2 }] 1 2)
+
+(defn user-own-cell? [map color { x :x y :y }]
+  (= (:owner (get-cell map x y))
+     color))
+
+(defn cell-in-range? [map { src-x :x src-y :y } { dst-x :x dst-y :y }]
+  ;; TODO
+  true)
+
+(defn cell-is-empty? [map { x :x y :y }]
+  (nil? (:owner (get-cell map x y))))
+
+(defn is-valid-move? [game username src-cell dst-cell]
+  (let [map (:game/map game)
+        user-color (get-user-color game username)]
+    (and
+      (user-own-cell? map user-color src-cell)
+      (cell-in-range? map src-cell dst-cell)
+      (cell-is-empty? map dst-cell))))
+
 

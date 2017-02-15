@@ -69,6 +69,28 @@
       (entities/user-invited? src-username dst-username) (src-send-err "user canceled invite")
       :else (start-game (entities/get-invite dst-username src-username)))))
 
+(defn move [game username src-cell dst-cell]
+;;   (transact!)
+;;   (if (movements-available?)
+;;     (send-next-player-turn game)
+;;     (do
+;;       (fill-board game)
+;;       (send-win game)))
+;;   (send-move-confirm username))
+  )
+
+(defn make-move [msg]
+  (let [{ username :username
+          owner :owner
+          src-cell :src-cell
+          dst-cell :dst-cell } msg
+        game (entities/get-game owner)
+        src-send-err (partial send-msg "make-move" username :error)]
+    (cond
+      (nil? game) (src-send-err "game dont exists")
+      (entities/is-valid-move? game username src-cell dst-cell) (src-send-err "invalid move")
+      :else (move game username src-cell dst-cell))))
+
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
   (match [msg]
@@ -76,6 +98,6 @@
          [{ :type "get-boards" }] (get-boards msg)
          [{ :type "send-invite" }] (send-invite msg)
          [{ :type "accept-invite" }] (accept-invite msg)
-;;          [{ :type "make-move" }] (make-move msg)
-;;          [{ :type "finish-game" }] (finish-game msg)
+         [{ :type "make-move" }] (make-move msg)
+;;          [{ :type "surrender" }] (surrender msg)
          :else (log/user-error (:username msg) "unknown message" (:type msg))))
