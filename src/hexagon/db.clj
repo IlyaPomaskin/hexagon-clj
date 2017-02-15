@@ -24,16 +24,16 @@
 ;; utils
 
 (defn eid-by-av [a v]
-  (-> (d/datoms @db :avet a v)
-      first
-      :e))
+  (d/q '{:find  [?e .]
+         :in    [$ ?a ?v]
+         :where [[?e ?a ?v]]} @db a v))
 
 (defn entity-by-eid [eid]
   (d/entity @db eid))
 
 (defn entity-by-av [a v]
-  (when-let [eid (eid-by-av db a v)]
-    (entity-by-eid db eid)))
+  (when-let [eid (eid-by-av a v)]
+    (entity-by-eid eid)))
 
 (defn retract-by-av [a v]
   (d/transact! db [[ :db.fn/retractEntity (eid-by-av db a v) ]]))
