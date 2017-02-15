@@ -56,7 +56,7 @@
       :else (invite src-username dst-username game-settings))))
 
 (defn start-game [invite]
-  ;; TODO
+  (entities/start-game invite)
   (log/game-info "start-game" invite))
 
 (defn accept-invite [msg]
