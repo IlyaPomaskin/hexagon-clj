@@ -102,18 +102,18 @@
 (defn create-game-settings [settings]
   (let [board-eid (-> settings :board get-board :db/id (or default-board))
         timeout-eid (-> settings :timeout get-timeout :db/id (or default-timeout))
-        src-first-move? (boolean (:src-first-move settings))]
+        owner-first-move? (boolean (:owner-first-move settings))]
     { :game-settings/board board-eid
       :game-settings/timeout board-eid
-      :game-settings/src-first-move? src-first-move? }))
+      :game-settings/owner-first-move? owner-first-move? }))
 
 ;; game
 
 (defn start-game [{ from :invite/from
                     to :invite/to
                     settings :invite/settings }]
-  (let [blue (if (:game-settings/src-first-move? settings) from to)
-        red (if (:game-settings/src-first-move? settings) to from)
+  (let [blue (if (:game-settings/owner-first-move? settings) from to)
+        red (if (:game-settings/owner-first-move? settings) to from)
         board (:game-settings/board settings)]
     (d/transact! db [{ :game/blue blue
                        :game/red red

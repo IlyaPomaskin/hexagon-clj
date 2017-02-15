@@ -14,7 +14,7 @@
     :timeout/seconds {}
     :game-settings/board { :db/valueType :db.type/ref }
     :game-settings/timeout { :db/valueType :db.type/ref }
-    :game-settings/src-first-move? {}
+    :game-settings/owner-first-move? {}
     :invite/from { :db/valueType :db.type/ref
                    :db/unique :db.unique/identity }
     :invite/to { :db/valueType :db.type/ref
