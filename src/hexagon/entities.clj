@@ -13,15 +13,18 @@
 
 (def default-board (db/eid-by-av :board/name "classic"))
 
+(defn get-board [name]
+  (db/entity-by-av :board/name name))
+
+(defn board-exists? [board]
+  (some? (get-board board)))
+
 ;; TODO return map instead of vec
 (defn get-boards []
   (d/q '[:find ?name ?map
          :where
          [_ :board/name ?name]
          [_ :board/map ?map]] @db))
-
-(defn board-exists [board]
-  (not (nil? (db/eid-by-av :board/name board))))
 
 ;;timeouts
 
@@ -31,8 +34,11 @@
 
 (def default-timeout (db/eid-by-av :timeout/seconds 90))
 
-(defn timeout-exists [timeout]
-  (not (nil? (db/eid-by-av :timeout/seconds timeout))))
+(defn get-timeout [timeout]
+  (db/entity-by-av :timeout/seconds timeout))
+
+(defn timeout-exists? [timeout]
+  (some? (get-timeout timeout)))
 
 ;; users
 
@@ -58,7 +64,7 @@
   (db/retract-by-av :user/name username))
 
 (defn user-exists? [username]
-  (not (nil? (db/eid-by-av :user/name username))))
+  (some? (db/eid-by-av :user/name username)))
 
 (defn get-usernames []
   (d/q '[:find [?name ...]
@@ -76,19 +82,25 @@
                      :invite/settings -1 }]))
 
 (defn invite-exists? [from to]
-  (not (nil? (get-invite from to))))
+  (some? (get-invite from to)))
+
+(defn invite-from-user-exists? [from]
+  (some? (d/q '[:find ?e .
+                :where
+                [?e :invite/from (db/eid-by-av :user/name from)]] @db)))
 
 (defn get-invite [from to]
   (d/q '[:find ?e .
-           :where
-           [?e :invite/from (db/eid-by-av :user/name src)]
-           [?e :invite/to (db/eid-by-av :user/name dst)]] @db))
+         :where
+         [?e :invite/from (db/eid-by-av :user/name from)]
+         [?e :invite/to (db/eid-by-av :user/name to)]] @db))
 
 ;; game-settings
 
-(defn create-game-settings [{ board :board
-                              timeout :timeout
-                              src-first-move? :is-src-first }]
-  { :game-settings/board (if-not (board-exists board) default-board board)
-    :game-settings/timeout (if-not (timeout-exists timeout) default-timeout timeout)
-    :game-settings/src-first-move? (boolean src-first-move?) })
+(defn create-game-settings [settings]
+  (let [board-eid (-> settings :board get-board :db/id (or default-board))
+        timeout-eid (-> settings :timeout get-timeout :db/id (or default-timeout))
+        src-first-move? (boolean (:src-first-move settings))]
+    { :game-settings/board board-eid
+      :game-settings/timeout board-eid
+      :game-settings/src-first-move? src-first-move? }))
