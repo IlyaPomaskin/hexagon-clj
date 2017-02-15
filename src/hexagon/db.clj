@@ -22,8 +22,10 @@
     :invite/settings { :db/valueType :db.type/ref }
     :game/blue { :db/valueType :db.type/ref }
     :game/red { :db/valueType :db.type/ref }
+    :game/owner { :db/valueType :db.type/ref }
     :game/settings { :db/valueType :db.type/ref }
-    :game/board {}})
+    :game/map {}
+    :game/turn {}})
 
 (def db (d/create-conn schema))
 

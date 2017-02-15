@@ -117,5 +117,8 @@
         board (:game-settings/board settings)]
     (d/transact! db [{ :game/blue blue
                        :game/red red
+                       :game/owner from
                        :game/settings settings
-                       :game/board board }])))
+                       :game/map (:board/map board)
+                       :game/turn blue }])))
+
