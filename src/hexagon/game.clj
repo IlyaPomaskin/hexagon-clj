@@ -49,7 +49,6 @@
           game-settings :game-settings } msg
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
-      (nil? dst-username) (src-send-err "no username")
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
       (entities/user-playing? dst-username) (src-send-err  "user already playing")
@@ -65,10 +64,8 @@
           dst-username :dst }
         src-send-err (partial send-msg "accept-invite" src-username :error)]
     (cond
-      (nil? dst-username) (src-send-err "no username")
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (entities/user-playing? dst-username) (src-send-err  "user already playing")
       (entities/user-invited? src-username dst-username) (src-send-err "user canceled invite")
       :else (start-game (entities/get-invite dst-username src-username)))))
 
