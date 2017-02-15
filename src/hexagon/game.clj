@@ -45,16 +45,16 @@
 
 (defn send-invite [msg]
   (let [{ src-username :username
-          dst-username :dst } msg
-        game-settings (entities/create-game-settings (:game-settings msg))
+          dst-username :dst
+          game-settings :game-settings } msg
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
       (nil? dst-username) (src-send-err "no username")
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
       (entities/user-playing? dst-username) (src-send-err  "user already playing")
-      ;; limit invites?
-      :else (invite (assoc msg :game-settings game-settings)))))
+      (entities/invite-from-user-exists? src-username) (src-send-err "invite already sent")
+      :else (invite src-username dst-username game-settings))))
 
 (defn start-game [invite]
   ;; TODO
