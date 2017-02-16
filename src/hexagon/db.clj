@@ -44,4 +44,7 @@
     (entity-by-eid eid)))
 
 (defn retract-by-av [a v]
-  (d/transact! db [[ :db.fn/retractEntity (eid-by-av db a v) ]]))
+  ;; TODO throw when (nil? eid)
+  (when-let [eid (eid-by-av a v)]
+    (d/transact! db [[ :db.fn/retractEntity eid ]])))
+
