@@ -44,16 +44,6 @@
 
 ;; users
 
-;; (defn get-in-users
-;;   ([path] (get-in @users path))
-;;   ([path default-value] (get-in @users path default-value)))
-
-;; (defn assoc-in-users [path value]
-;;   (swap! users assoc-in path value))
-
-;; (defn update-in-users [path fn]
-;;   (swap! users update-in path fn))
-
 (defn get-user [username]
   (db/entity-by-av :user/name username))
 
