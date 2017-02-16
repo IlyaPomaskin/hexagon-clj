@@ -24,8 +24,11 @@
     :game/red { :db/valueType :db.type/ref }
     :game/owner { :db/valueType :db.type/ref }
     :game/settings { :db/valueType :db.type/ref }
-    :game/map {}
-    :game/turn {}})
+    :game/turn {}
+    :cell/x {}
+    :cell/y {}
+    :cell/owner { :db/valueType :db.type/ref }
+    :cell/game { :db/valueType :db.type/ref } })
 
 (def db (d/create-conn schema))
 

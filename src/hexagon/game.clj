@@ -52,7 +52,7 @@
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
       (entities/user-playing? dst-username) (src-send-err  "user already playing")
-      (entities/get-invite-by-user src-username) (src-send-err "invite already sent")
+      (entities/get-invite-by-username src-username) (src-send-err "invite already sent")
       :else (invite src-username dst-username game-settings))))
 
 (defn start-game [invite]
@@ -95,7 +95,7 @@
 
 (defn make-move [msg]
   (let [{ username :username
-          owner :owner
+          owner :game-owner
           src-cell :src-cell
           dst-cell :dst-cell } msg
         game (entities/get-game owner)
@@ -108,6 +108,7 @@
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
   (match [msg]
+         ;; TODO check user state before dispatch
          [{ :type "get-users-list" }] (get-users-list msg)
          [{ :type "get-boards" }] (get-boards msg)
          [{ :type "send-invite" }] (send-invite msg)

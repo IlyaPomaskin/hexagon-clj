@@ -8,11 +8,12 @@
 (d/transact! db [{ :board/name "classic"
                    :board/map [{ :x 1
                                  :y 2
-                                 :owner :none }]}
+                                 :type :normal
+                                 :owner nil }]}
                  { :board/name "modern"
                    :board/map [{ :x 2
                                  :y 1
-                                 :owner :none }]}])
+                                 :owner nil }]}])
 
 (def default-board (db/eid-by-av :board/name "classic"))
 
@@ -100,31 +101,59 @@
          [?e :invite/from ?from]
          [?e :invite/to ?to]] @db (get-user-eid from) (get-user-eid to)))
 
-(defn get-invite-by-user [from]
-  (db/entity-by-av :invite/from (get-user-eid from)))
+(defn get-invite-by-user-eid [from]
+  (db/entity-by-av :invite/from from))
+
+(defn get-invite-by-username [from]
+  (get-invite-by-user-eid (get-user-eid from)))
 
 ;; game
 
-(defn start-game [{ from :invite/from
-                    to :invite/to
-                    settings :invite/settings }]
-  (let [blue (if (:game-settings/owner-first-move? settings) from to)
+(defn board-cell->game-cell [game cell]
+  { :cell/x (:x cell)
+    :cell/y (:y cell)
+    :cell/type (:type cell)
+    :cell/owner (case (:owner cell)
+                  :red (:game/red game)
+                  :blue (:game/blue game)
+                  nil)
+    :cell/game (:db/id game) })
+
+(defn create-game-board-cells [game]
+  (let [board-map (d/q '[:find ?map .
+                         :in $ ?eid
+                         :where
+                         [?board :board/map ?map]
+                         [?eid :game-settings/board ?board]] @db (:game/settings game))]
+    (mapv (partial board-cell->game-cell game) board-map)))
+
+(defn make-game [invite]
+  (let [{ from :invite/from
+          to :invite/to
+          settings :invite/settings } invite
+        blue (if (:game-settings/owner-first-move? settings) from to)
         red (if (:game-settings/owner-first-move? settings) to from)
-        board (:game-settings/board settings)
-        src-user-invite-eid (:db/id (get-invite-by-user from))
-        dst-user-invite-eid (:db/id (get-invite-by-user to))]
-    (d/transact! db [{ :db/id from
-                       :user/playing? true }
-                     { :db/id to
-                       :user/playing? true }
-                     { :db.fn/retractEntity src-user-invite-eid }
-                     { :db.fn/retractEntity dst-user-invite-eid }
-                     { :game/blue blue
-                       :game/red red
-                       :game/owner from
-                       :game/settings settings
-                       :game/map (:board/map board)
-                       :game/turn blue }])))
+        board (:game-settings/board settings)]
+    { :db/id -1
+      :game/blue blue
+      :game/red red
+      :game/owner from
+      :game/settings settings
+      :game/turn blue }))
+
+(defn start-game [invite]
+  (let [{ from :invite/from
+          to :invite/to } invite
+        game (make-game invite)]
+    (d/transact! db (concat
+                      [{ :db/id from
+                         :user/playing? true }
+                       { :db/id to
+                         :user/playing? true }
+                       { :db.fn/retractEntity (:db/id (get-invite-by-user-eid from)) }
+                       { :db.fn/retractEntity (:db/id (get-invite-by-user-eid to)) }
+                       game]
+                       (create-game-board-cells game)))))
 
 (defn get-game [owner-username]
   (let [owner-eid (get-user-eid owner-username)]
