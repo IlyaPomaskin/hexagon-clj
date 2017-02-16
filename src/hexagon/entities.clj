@@ -95,8 +95,8 @@
 
 (defn add-invite [from to settings]
   (d/transact! db [(assoc (create-game-settings settings) :db/id -1)
-                   { :invite/to to
-                     :invite/from from
+                   { :invite/to (get-user-eid to)
+                     :invite/from (get-user-eid from)
                      :invite/settings -1 }]))
 
 (defn invite-exists? [from to]
