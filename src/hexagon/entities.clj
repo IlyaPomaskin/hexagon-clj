@@ -140,13 +140,24 @@
       :blue
       :red)))
 
+(defn make-move [game]
+  ;; TODO
+  true)
+
+(defn movements-available? [game]
+;; (movements-available? game :red)
+;; (movements-available? game :blue)
+;; TODO
+  true)
+
+(defn autofill-board [game]
+  true)
+
 (defn get-cell [map x y]
   (first (filterv (fn [{ cell-x :x
                          cell-y :y }]
                     (and (= cell-x x) (= cell-y y)))
                   map)))
-
-(get-cell [{ :x 1 :y 2 }] 1 2)
 
 (defn user-own-cell? [map color { x :x y :y }]
   (= (:owner (get-cell map x y))
@@ -157,7 +168,8 @@
   true)
 
 (defn cell-is-empty? [map { x :x y :y }]
-  (nil? (:owner (get-cell map x y))))
+  (= (:owner (get-cell map x y))
+     :none))
 
 (defn is-valid-move? [game username src-cell dst-cell]
   (let [map (:game/map game)
@@ -166,5 +178,3 @@
       (user-own-cell? map user-color src-cell)
       (cell-in-range? map src-cell dst-cell)
       (cell-is-empty? map dst-cell))))
-
-

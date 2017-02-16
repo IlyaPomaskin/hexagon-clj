@@ -69,14 +69,25 @@
       (entities/user-invited? src-username dst-username) (src-send-err "user canceled invite")
       :else (start-game (entities/get-invite dst-username src-username)))))
 
+(defn next-player-turn [game]
+  ;; TODO
+  true)
+
+(defn win [game]entities/autofill-board game
+;;   (entities/autofill-board game)
+  ;; TODO
+  true)
+
+(defn confirm-move [username src-cell dst-cell]
+  ;; TODO
+  true)
+
 (defn move [game username src-cell dst-cell]
-;;   (transact!)
-;;   (if (movements-available?)
-;;     (send-next-player-turn game)
-;;     (do
-;;       (fill-board game)
-;;       (send-win game)))
-;;   (send-move-confirm username))
+;;   (entities/make-move game username src-cell dst-cell)
+;;   (if (entities/movements-available? game)
+;;     (next-player-turn game)
+;;     (win game))
+;;   (confirm-move username src-cell dst-cell))
   )
 
 (defn make-move [msg]
