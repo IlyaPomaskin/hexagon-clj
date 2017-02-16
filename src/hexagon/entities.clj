@@ -78,6 +78,16 @@
 (defn user-playing? [username]
   (:playing? (db/entity-by-av :user/name username)))
 
+;; game-settings
+
+(defn create-game-settings [settings]
+  (let [board-eid (-> settings :board get-board :db/id (or default-board))
+        timeout-eid (-> settings :timeout get-timeout :db/id (or default-timeout))
+        owner-first-move? (boolean (:owner-first-move settings))]
+    { :game-settings/board board-eid
+      :game-settings/timeout board-eid
+      :game-settings/owner-first-move? owner-first-move? }))
+
 ;; invites
 
 (defn add-invite [from to settings]
@@ -99,16 +109,6 @@
          :where
          [?e :invite/from (db/eid-by-av :user/name from)]
          [?e :invite/to (db/eid-by-av :user/name to)]] @db))
-
-;; game-settings
-
-(defn create-game-settings [settings]
-  (let [board-eid (-> settings :board get-board :db/id (or default-board))
-        timeout-eid (-> settings :timeout get-timeout :db/id (or default-timeout))
-        owner-first-move? (boolean (:owner-first-move settings))]
-    { :game-settings/board board-eid
-      :game-settings/timeout board-eid
-      :game-settings/owner-first-move? owner-first-move? }))
 
 ;; game
 
