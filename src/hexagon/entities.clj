@@ -60,6 +60,9 @@
 (defn get-user-eid [username]
   (db/eid-by-av :user/name username))
 
+(defn get-user-by-eid [eid]
+  (db/entity-by-eid eid))
+
 (defn add-user [username channel]
   (d/transact! db [{ :user/name username
                      :user/channel channel

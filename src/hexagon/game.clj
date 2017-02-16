@@ -57,23 +57,25 @@
 
 (defn start-game [invite]
   (entities/start-game invite)
+  (send-msg "start-game" (entities/get-user-by-eid (:invite/to invite)) :payload invite)
+  (send-msg "start-game" (entities/get-user-by-eid (:invite/from invite)) :payload invite)
   (log/game-info "start-game" invite))
 
 (defn accept-invite [msg]
   (let [{ src-username :username
-          dst-username :dst }
+          dst-username :dst } msg
         src-send-err (partial send-msg "accept-invite" src-username :error)]
     (cond
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (entities/user-invited? src-username dst-username) (src-send-err "user canceled invite")
+      (entities/invite-exists? dst-username src-username) (src-send-err "user canceled invite")
       :else (start-game (entities/get-invite dst-username src-username)))))
 
 (defn next-player-turn [game]
   ;; TODO
   true)
 
-(defn win [game]entities/autofill-board game
+(defn win [game]
 ;;   (entities/autofill-board game)
   ;; TODO
   true)
