@@ -102,16 +102,15 @@
 (defn invite-exists? [from to]
   (some? (get-invite from to)))
 
-(defn invite-from-user-exists? [from]
-  (some? (d/q '[:find ?e .
-                :where
-                [?e :invite/from (db/eid-by-av :user/name from)]] @db)))
-
 (defn get-invite [from to]
   (d/q '[:find ?e .
+         :in $ ?from ?to
          :where
-         [?e :invite/from (db/eid-by-av :user/name from)]
-         [?e :invite/to (db/eid-by-av :user/name to)]] @db))
+         [?e :invite/from ?from]
+         [?e :invite/to ?to]] @db (get-user-eid from) (get-user-eid to)))
+
+(defn get-invite-by-user [from]
+  (db/entity-by-av :invite/from (get-user-eid from)))
 
 ;; game
 

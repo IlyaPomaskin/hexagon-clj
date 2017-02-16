@@ -52,11 +52,12 @@
       (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
       (entities/user-playing? dst-username) (src-send-err  "user already playing")
-      (entities/invite-from-user-exists? src-username) (src-send-err "invite already sent")
+      (entities/get-invite-by-user src-username) (src-send-err "invite already sent")
       :else (invite src-username dst-username game-settings))))
 
 (defn start-game [invite]
   (entities/start-game invite)
+  ;; TODO Remove keywords from 'invite' fieldnames
   (send-msg "start-game" (entities/get-user-by-eid (:invite/to invite)) :payload invite)
   (send-msg "start-game" (entities/get-user-by-eid (:invite/from invite)) :payload invite)
   (log/game-info "start-game" invite))
