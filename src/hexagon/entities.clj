@@ -1,6 +1,7 @@
 (ns hexagon.entities
   (:require [datascript.core :as d]
-            [hexagon.db :as db :refer [db]]))
+            [hexagon.db :as db :refer [db]]
+            [hexagon.hex :as hex]))
 
 ;; boards
 
@@ -140,9 +141,12 @@
       :blue
       :red)))
 
-(defn make-move [game]
+(defn make-move [game username src-cell dst-cell]
   ;; TODO
-  true)
+;;   (when (hex/is-jump? src-cell dst-cell)
+;;     (clear-cell src-cell))
+;;   (occupy-cell dst-cell))
+)
 
 (defn movements-available? [game]
 ;; (movements-available? game :red)
@@ -150,31 +154,10 @@
 ;; TODO
   true)
 
-(defn autofill-board [game]
-  true)
-
-(defn get-cell [map x y]
-  (first (filterv (fn [{ cell-x :x
-                         cell-y :y }]
-                    (and (= cell-x x) (= cell-y y)))
-                  map)))
-
-(defn user-own-cell? [map color { x :x y :y }]
-  (= (:owner (get-cell map x y))
-     color))
-
-(defn cell-in-range? [map { src-x :x src-y :y } { dst-x :x dst-y :y }]
-  ;; TODO
-  true)
-
-(defn cell-is-empty? [map { x :x y :y }]
-  (= (:owner (get-cell map x y))
-     :none))
-
 (defn is-valid-move? [game username src-cell dst-cell]
   (let [map (:game/map game)
         user-color (get-user-color game username)]
     (and
-      (user-own-cell? map user-color src-cell)
-      (cell-in-range? map src-cell dst-cell)
-      (cell-is-empty? map dst-cell))))
+      (hex/user-own-cell? map user-color src-cell)
+      (hex/cell-in-range? map src-cell dst-cell)
+      (hex/cell-is-empty? map dst-cell))))
