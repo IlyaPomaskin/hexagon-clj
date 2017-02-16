@@ -119,8 +119,16 @@
                     settings :invite/settings }]
   (let [blue (if (:game-settings/owner-first-move? settings) from to)
         red (if (:game-settings/owner-first-move? settings) to from)
-        board (:game-settings/board settings)]
-    (d/transact! db [{ :game/blue blue
+        board (:game-settings/board settings)
+        src-user-invite-eid (:db/id (get-invite-by-user from))
+        dst-user-invite-eid (:db/id (get-invite-by-user to))]
+    (d/transact! db [{ :db/id from
+                       :user/playing? true }
+                     { :db/id to
+                       :user/playing? true }
+                     { :db.fn/retractEntity src-user-invite-eid }
+                     { :db.fn/retractEntity dst-user-invite-eid }
+                     { :game/blue blue
                        :game/red red
                        :game/owner from
                        :game/settings settings
