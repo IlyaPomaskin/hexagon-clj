@@ -76,11 +76,3 @@
 ;; TODO
   true)
 
-(defn is-valid-move? [game username src-cell dst-cell]
-;;   (let [map (:game/map game)
-;;         user-color (get-user-color game username)]
-;;     (and
-;;       (hex/user-own-cell? map user-color src-cell)
-;;       (hex/cell-in-range? map src-cell dst-cell)
-;;       (hex/cell-is-empty? map dst-cell))))
-  true)
