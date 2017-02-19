@@ -62,5 +62,6 @@
   (->>
     (d/q '{:find [?e ?a ?v]
            :where [[?e ?a ?v]]} @db)
+    (sort-by #(nth %1 1))
     (sort-by first)
     clojure.pprint/pprint))
