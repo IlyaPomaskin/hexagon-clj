@@ -68,7 +68,7 @@
 
 (defn accept-invite [msg]
   (let [{ src-username :username
-          dst-username :to } msg
+          dst-username :from } msg
         src-send-err (partial send-msg "accept-invite" src-username :error)]
     (cond
       (not (user/exists? dst-username)) (src-send-err  "user not found")
