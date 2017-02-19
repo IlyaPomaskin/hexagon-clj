@@ -90,10 +90,9 @@
 
 (defn make-move [msg]
   (let [{ username :username
-          owner :game-owner
           src-cell :src-cell
           dst-cell :dst-cell } msg
-        game (game/get owner)
+        game (game/get username)
         game-board (cell/get-board game)
         src-send-err (partial send-msg "make-move" username :error)]
     (cond
