@@ -7,23 +7,21 @@
             [hexagon.entities.user :as user]
             [hexagon.entities.game-settings :as game-settings]))
 
-(defn board-cell->game-cell [game cell]
-  { :cell/x (:x cell)
-    :cell/y (:y cell)
-    :cell/type (:type cell)
-    :cell/owner (case (:owner cell)
-                  :red (:game/red game)
-                  :blue (:game/blue game)
-                  nil)
-    :cell/game (:db/id game) })
-
-(defn create-game-board-cells [game]
-  (let [board-map (d/q '[:find ?map .
-                         :in $ ?eid
-                         :where
-                         [?board :board/map ?map]
-                         [?eid :game-settings/board ?board]] @db (:game/settings game))]
-    (mapv (partial board-cell->game-cell game) board-map)))
+(defn create-game-board [game]
+  (->>
+    game
+    :game/settings
+    (d/q '[:find ?map .
+           :in $ ?eid
+           :where
+           [?board :board/map ?map]
+           [?eid :game-settings/board ?board]] @db)
+    (mapv #(merge %1
+                  { :cell/owner (case (:owner %1)
+                                  :red (:game/red game)
+                                  :blue (:game/blue game)
+                                  nil)
+                    :cell/game (:db/id game) }))))
 
 (defn make-game [invite]
   (let [{ from :invite/from
@@ -51,7 +49,7 @@
                        { :db.fn/retractEntity (:db/id (invite/get-by-user-eid from)) }
                        { :db.fn/retractEntity (:db/id (invite/get-by-user-eid to)) }
                        game]
-                       (create-game-board-cells game)))))
+                       (create-game-board game)))))
 
 (defn get [owner-username]
   (let [owner-eid (user/get-eid owner-username)]
