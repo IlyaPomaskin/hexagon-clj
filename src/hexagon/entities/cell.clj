@@ -127,6 +127,10 @@
   (<= (distance src-cell dst-cell)
       2))
 
+(defn is-jump? [src-cell dst-cell]
+  (= (distance src-cell dst-cell)
+     2))
+
 (defn is-valid-move? [game-board username src-cell-coords dst-cell-coords]
   (let [src-cell (get-cell src-cell-coords)
         dst-cell (get-cell dst-cell-coords)]
