@@ -29,7 +29,7 @@
     (d/entity @db eid)))
 
 (defn exists? [from to]
-  (some? (get from to)))
+  (some? (get-eid from to)))
 
 (defn get-by-user-eid [from]
   (db/entity-by-av :invite/from from))
