@@ -19,10 +19,13 @@
       (fn [{ x :x y :y}]
         { :cell/x x
           :cell/y y
-          :cell/type :normal
-          :cell/game 123 }))))
+          :cell/type :normal }))
+    vec))
 
-;; (d/transact! db (create-cells 10))
+;; (-> (create-cells 5)
+;;     (assoc-in [0 :cell/owner] :red)
+;;     (assoc-in [(- (* 5 5) 1) :cell/owner] :blue)
+;;     clojure.pprint/pprint)
 
 ;; conversion
 
