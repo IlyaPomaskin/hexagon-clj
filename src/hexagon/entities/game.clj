@@ -69,16 +69,18 @@
       :red)))
 
 (defn move [game username src-cell-coords dst-cell-coords]
-  (let [changes (atom #{})
-        src-cell (cell/get-cell src-cell-coords)
-        dst-cell (cell/get-cell dst-cell-coords)
-        dst-w-neighbours (conj (cell/get-neighbours dst-cell)
-                               dst-cell)
-        next-dst (cell/occupy-cells dst-w-neighbours (user/get-eid username))
-        game-board (atom nil)]
+  (let [changes (atom [])
+        game-board (atom (cell/get-board game))
+        src-cell (cell/get-cell @game-board src-cell-coords)
+        dst-cell (cell/get-cell @game-board dst-cell-coords)
+        neighbours (cell/get-neighbours @game-board dst-cell)
+        user-eid (user/get-eid username)
+        oppenent-cells (cell/take-oppenent-cells user-eid neighbours)]
     (when (cell/is-jump? src-cell dst-cell)
+      (clojure.pprint/pprint "cell/is-jump?")
       (swap! changes conj (cell/clear-cell src-cell)))
-    (swap! changes clojure.set/union (cell/occupy-cells (user/get-eid username) dst-w-neighbours))
+    (swap! changes concat (mapv #(cell/set-cell-owner user-eid %1)
+                                (conj oppenent-cells dst-cell)))
     (d/transact! db @changes)
     ;; TODO autofill board
     ;; (reset! game-board (cell/get-board game))

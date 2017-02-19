@@ -146,14 +146,14 @@
       :else true)))
 
 (defn clear-cell [{ cell-eid :db/id }]
-  { :db/id cell-eid
-    :cell/owner nil })
+  [ :db.fn/retractAttribute cell-eid :cell/owner ])
 
-(defn occupy-cells [user-eid cells]
-  (->>
-    cells
-    (filterv #(and (some? (:cell/owner %1))
-                   (not= (:cell/owner %1)
-                         user-eid)))
-    (mapv #(hash-map :db/id (:db/id %1)
-                     :cell/owner user-eid))))
+(defn set-cell-owner [user-eid cell]
+  { :db/id (:db/id cell)
+    :cell/owner user-eid })
+
+(defn take-oppenent-cells [user-eid cells]
+  (filterv #(and (some? (:cell/owner %1))
+                 (not= (:db/id (:cell/owner %1))
+                       user-eid))
+           cells))
