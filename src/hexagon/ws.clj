@@ -23,7 +23,8 @@
     (catch com.fasterxml.jackson.core.JsonParseException e
       (log/ws-error username "Can't parse json: " msg))
     (catch Exception e
-      (log/ws-error username e))))
+      (log/ws-error username e)
+      (clojure.stacktrace/print-stack-trace e))))
 
 (defn ws-handler [request]
   (let [username (-> request :params :username)]
