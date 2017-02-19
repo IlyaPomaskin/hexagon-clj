@@ -148,7 +148,8 @@
 (defn occupy-cells [user-eid cells]
   (->>
     cells
-    (filterv #(not= (:cell/owner %1)
-                    user-eid))
+    (filterv #(and (some? (:cell/owner %1))
+                   (not= (:cell/owner %1)
+                         user-eid)))
     (mapv #(hash-map :db/id (:db/id %1)
                      :cell/owner user-eid))))
