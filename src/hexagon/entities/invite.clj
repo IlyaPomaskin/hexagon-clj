@@ -36,3 +36,8 @@
 
 (defn get-by-username [from]
   (get-by-user-eid (user/get-eid from)))
+
+(defn serialize [invite]
+  { :to (:user/name (:invite/to invite))
+    :from (:user/name (:invite/from invite))
+    :settings (game-settings/serialize (:invite/settings invite)) })
