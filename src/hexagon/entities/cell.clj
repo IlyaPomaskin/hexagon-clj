@@ -1,7 +1,8 @@
 (ns hexagon.entities.cell
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
-            [hexagon.entities.user :as user]))
+            [hexagon.entities.user :as user]
+            [hexagon.log :as log]))
 
 ;; tmp utils
 
@@ -132,14 +133,15 @@
      2))
 
 (defn is-valid-move? [game-board username src-cell-coords dst-cell-coords]
-  (let [src-cell (get-cell src-cell-coords)
-        dst-cell (get-cell dst-cell-coords)]
-    (and
-      (is-available-cell? src-cell)
-      (is-available-cell? dst-cell)
-      (user-own-cell? src-cell username)
-      (cell-is-empty? dst-cell)
-      (cell-in-range? src-cell dst-cell))))
+  (let [src-cell (get-cell game-board src-cell-coords)
+        dst-cell (get-cell game-board dst-cell-coords)]
+    (cond
+      (not (is-available-cell? src-cell)) (log/cell-error "is-valid-move?" "is-available-cell? src-cell")
+      (not (is-available-cell? dst-cell)) (log/cell-error "is-valid-move?" "is-available-cell? dst-cell")
+      (not (user-own-cell? src-cell username)) (log/cell-error "is-valid-move?" "user-own-cell?")
+      (not (cell-is-empty? dst-cell)) (log/cell-error "is-valid-move?" "cell-is-empty?")
+      (not (cell-in-range? src-cell dst-cell)) (log/cell-error "is-valid-move?" "cell-in-range?")
+      :else true)))
 
 (defn clear-cell [{ cell-eid :db/id }]
   { :db/id cell-eid

@@ -98,7 +98,7 @@
     (cond
       (nil? game) (src-send-err "game not found")
       (false? (game/is-user-turn? game username)) (src-send-err "wrong turn")
-      (cell/is-valid-move? game-board username src-cell dst-cell) (src-send-err "invalid move")
+      (nil? (cell/is-valid-move? game-board username src-cell dst-cell)) (src-send-err "invalid move")
       :else (do
               (game/move game username src-cell dst-cell)
               (if (game/movements-available?)

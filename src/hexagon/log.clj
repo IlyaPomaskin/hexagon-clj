@@ -20,4 +20,8 @@
 (def game-error (log "game" "ERR"))
 (def game-debug (log "game" "DEBUG"))
 (def game-debug (fn [& args] nil))
+(def cell-info (log "cell" "INFO"))
+(def cell-error (log "cell" "ERR"))
+(def cell-debug (log "cell" "DEBUG"))
+(def cell-debug (fn [& args] nil))
 
