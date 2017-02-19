@@ -1,7 +1,6 @@
 (ns hexagon.entities.cell
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
-            [hexagon.entities.game :as game]
             [hexagon.entities.user :as user]))
 
 ;; tmp utils
