@@ -8,7 +8,7 @@
             [hexagon.entities.game-settings :as game-settings]
             [hexagon.entities.cell :as cell]))
 
-(defn set-cell-owner [cell game]
+(defn set-board-cell-owner [cell game]
   (if (some? (:cell/owner cell))
     (assoc cell :cell/owner (if (= (:cell/owner cell) :red)
                               (:game/red game)
@@ -17,7 +17,7 @@
 
 (defn board-cell->game-cell [game cell]
   (-> cell
-      (set-cell-owner game)
+      (set-board-cell-owner game)
       (assoc :cell/game (:db/id game))))
 
 (defn create-game-board [game invite]
