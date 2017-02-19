@@ -57,7 +57,7 @@
       (= src-username dst-username) (src-send-err  "wrong user")
       (user/playing? dst-username) (src-send-err  "user already playing")
       (invite/get-by-username src-username) (src-send-err "invite already sent")
-      :else (invite src-username dst-username game-settings))))
+      :else (invite msg))))
 
 (defn start-game [invite]
   (game/start invite)
