@@ -76,7 +76,7 @@
       (swap! changes conj (cell/clear-cell src-cell)))
     (swap! changes clojure.set/union (cell/occupy-cells (user/get-eid username) dst-w-neighbours))
     (d/transact! db @changes)
-    ;; TODO
+    ;; TODO autofill board
     ;; (reset! game-board (cell/get-board game))
     ;; (when-not (movements-available? @game-board)
     ;;   (reset! changes (fill-board @game-board)))
@@ -88,4 +88,11 @@
 ;; (movements-available? game :blue)
 ;; TODO
   true)
+
+(defn switch-turn [{ game-eid :db/id
+                     red :game/red
+                     blue :game/blue
+                     turn :game/turn }]
+  (d/transact! db { :db/id game-eid
+                    :game/turn (if (= turn red) blue red) }))
 

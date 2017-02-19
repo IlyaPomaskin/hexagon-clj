@@ -77,15 +77,11 @@
       :else (start-game (invite/get dst-username src-username)))))
 
 (defn next-player-turn [game]
-  ;; TODO
-  true)
+  (game/switch-turn)
+  (log/game-info "next-player-turn"))
 
 (defn win [game]
 ;;   (entities/autofill-board game)
-  ;; TODO
-  true)
-
-(defn confirm-move [username src-cell dst-cell]
   ;; TODO
   true)
 
@@ -106,9 +102,13 @@
         game-board (cell/get-board game)
         src-send-err (partial send-msg "make-move" username :error)]
     (cond
-      (nil? game) (src-send-err "game dont exists")
+      (nil? game) (src-send-err "game not found")
       (cell/is-valid-move? game-board username src-cell dst-cell) (src-send-err "invalid move")
-      :else (game/move game username src-cell dst-cell))))
+      :else (do
+              (game/move game username src-cell dst-cell)
+              (if (game/movements-available?)
+                (next-player-turn game)
+                (win game))))))
 
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)
