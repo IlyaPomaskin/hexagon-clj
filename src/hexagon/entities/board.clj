@@ -4,15 +4,26 @@
 
 (defonce initial-boards
   (d/transact! db [{ :board/name "classic"
-                     :board/map [{ :x 1
-                                   :y 2
-                                   :type :normal
-                                   :owner nil }]}
+                     :board/map [{ :cell/x 0
+                                   :cell/y 0
+                                   :cell/type :normal
+                                   :cell/owner nil }
+                                 { :cell/x 1
+                                   :cell/y 0
+                                   :cell/type :normal
+                                   :cell/owner :blue }
+                                 { :cell/x 1
+                                   :cell/y 1
+                                   :cell/type :normal
+                                   :cell/owner :red }
+                                 { :cell/x 1
+                                   :cell/y 1
+                                   :cell/type nil }]}
                    { :board/name "modern"
-                     :board/map [{ :x 2
-                                   :y 1
-                                   :type :normal
-                                   :owner nil }]}]))
+                     :board/map [{ :cell/x 2
+                                   :cell/y 1
+                                   :cell/type :normal
+                                   :cell/owner nil }]}]))
 
 (def default
   (db/eid-by-av :board/name "classic"))
