@@ -55,9 +55,10 @@
                       (mapv #(vec [:db.fn/retractEntity %1]) invites-for-deletion)
                       (create-game-board game invite)))))
 
-(defn get [owner-username]
-  (let [owner-eid (user/get-eid owner-username)]
-    (db/entity-by-av :game/owner owner-username)))
+(defn get [username]
+  (let [user-eid (user/get-eid username)]
+    (or (db/entity-by-av :game/red user-eid)
+        (db/entity-by-av :game/blue user-eid))))
 
 (defn get-user-color [game username]
   (let [settings (game-settings/get-by-game game)
