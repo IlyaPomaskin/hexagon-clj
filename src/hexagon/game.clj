@@ -41,15 +41,15 @@
   (send-msg "boards" username :payload board/get-boards))
 
 (defn invite [{ src-username :username
-                dst-username :dst
+                dst-username :to
                 game-settings :game-settings }]
   (invite/add src-username dst-username game-settings)
-  (send-msg "invite" dst-username :payload { :src src-username
+  (send-msg "invite" dst-username :payload { :from src-username
                                              :game-settings game-settings }))
 
 (defn send-invite [msg]
   (let [{ src-username :username
-          dst-username :dst
+          dst-username :to
           game-settings :game-settings } msg
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
@@ -68,7 +68,7 @@
 
 (defn accept-invite [msg]
   (let [{ src-username :username
-          dst-username :dst } msg
+          dst-username :to } msg
         src-send-err (partial send-msg "accept-invite" src-username :error)]
     (cond
       (not (user/exists? dst-username)) (src-send-err  "user not found")
