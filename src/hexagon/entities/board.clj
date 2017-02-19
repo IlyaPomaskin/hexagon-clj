@@ -11,6 +11,7 @@
                    { :board/name "modern"
                      :board/map [{ :x 2
                                    :y 1
+                                   :type :normal
                                    :owner nil }]}]))
 
 (def default

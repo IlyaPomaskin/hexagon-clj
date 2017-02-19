@@ -27,6 +27,7 @@
     :game/turn {}
     :cell/x {}
     :cell/y {}
+    :cell/type {}
     :cell/owner { :db/valueType :db.type/ref }
     :cell/game { :db/valueType :db.type/ref } })
 
