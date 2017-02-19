@@ -96,3 +96,18 @@
   (d/transact! db { :db/id game-eid
                     :game/turn (if (= turn red) blue red) }))
 
+(defn get-cells-count-by-user [game-eid user-eid]
+  (d/q '[:find (count ?e) .
+         :in $ ?game-eid ?user-eid
+         :where
+         [?e :cell/owner ?user-eid]
+         [?e :cell/game ?game-eid]] @db game-eid user-eid))
+
+(defn get-results [{ game-eid :db/id
+                     red :game/red
+                     blue :game/blue }]
+  (let [red-count (get-cells-count-by-user game-eid red)
+        blue-count (get-cells-count-by-user game-eid blue)]
+    (if (> blue-count red-count)
+      [red blue]
+      [blue red])))

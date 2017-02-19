@@ -81,17 +81,12 @@
   (log/game-info "next-player-turn"))
 
 (defn win [game]
-;;   (entities/autofill-board game)
-  ;; TODO
-  true)
-
-(defn move [game username src-cell dst-cell]
-;;   (entities/make-move game username src-cell dst-cell)
-;;   (if (entities/movements-available? game)
-;;     (next-player-turn game)
-;;     (win game))
-;;   (confirm-move username src-cell dst-cell))
-  )
+  (let [[winner-eid loser-eid] (game/get-winner game)
+        winner-username (:user/name (user/get-by-eid winner-eid))
+        loser-username (:user/name (user/get-by-eid loser-eid))]
+    (send-msg "win" winner-username)
+    (send-msg "lose" loser-username)
+    (log/game-info "game result" "winner" winner-username "loser" loser-username)))
 
 (defn make-move [msg]
   (let [{ username :username
