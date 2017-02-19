@@ -13,12 +13,22 @@
                      :invite/from (user/get-eid from)
                      :invite/settings -1 }]))
 
+(defn get-eid [from to]
+  (let [from-eid (user/get-eid from)
+        to-eid (user/get-eid to)]
+    (when (and (some? from-eid)
+               (some? to-eid))
+      (d/q '[:find ?e .
+             :in $ ?from ?to
+             :where
+             [?e :invite/from ?from]
+             [?e :invite/to ?to]] @db from-eid to-eid))))
+
 (defn get [from to]
-  (d/q '[:find ?e .
-         :in $ ?from ?to
-         :where
-         [?e :invite/from ?from]
-         [?e :invite/to ?to]] @db (user/get-eid from) (user/get-eid to)))
+  (when-let [eid (get-eid from to)]
+    (d/entity @db eid)))
+
+(get "test1" "test2")
 
 (defn exists? [from to]
   (some? (get from to)))
