@@ -116,4 +116,8 @@
       [red blue]
       [blue red])))
 
+(defn is-user-turn? [game username]
+  (= (user/get-eid username)
+     (:game/turn game)))
+
 ;; TODO delete entries after game
