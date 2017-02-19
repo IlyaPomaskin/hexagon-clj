@@ -5,7 +5,8 @@
             [hexagon.entities.timeout :as timeout]
             [hexagon.entities.invite :as invite]
             [hexagon.entities.user :as user]
-            [hexagon.entities.game-settings :as game-settings]))
+            [hexagon.entities.game-settings :as game-settings]
+            [hexagon.entities.cell :as cell]))
 
 (defn create-game-board [game]
   (->>
@@ -63,10 +64,24 @@
       :blue
       :red)))
 
-;; (defn make-move [game username src-cell dst-cell]
-;;   (when (hex/is-jump? src-cell dst-cell)
-;;     (clear-cell src-cell))
-;;   (occupy-cell dst-cell))
+(defn move [game username src-cell-coords dst-cell-coords]
+  (let [changes (atom #{})
+        src-cell (cell/get-cell src-cell-coords)
+        dst-cell (cell/get-cell dst-cell-coords)
+        dst-w-neighbours (conj (cell/get-neighbours dst-cell)
+                               dst-cell)
+        next-dst (cell/occupy-cells dst-w-neighbours (user/get-eid username))
+        game-board (atom nil)]
+    (when (cell/is-jump? src-cell dst-cell)
+      (swap! changes conj (cell/clear-cell src-cell)))
+    (swap! changes clojure.set/union (cell/occupy-cells (user/get-eid username) dst-w-neighbours))
+    (d/transact! db @changes)
+    ;; TODO
+    ;; (reset! game-board (cell/get-board game))
+    ;; (when-not (movements-available? @game-board)
+    ;;   (reset! changes (fill-board @game-board)))
+    ;; (d/transact! db @changes)
+    ))
 
 (defn movements-available? [game]
 ;; (movements-available? game :red)

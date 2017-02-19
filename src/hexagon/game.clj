@@ -108,7 +108,7 @@
     (cond
       (nil? game) (src-send-err "game dont exists")
       (cell/is-valid-move? game-board username src-cell dst-cell) (src-send-err "invalid move")
-      :else (move game username src-cell dst-cell))))
+      :else (game/move game username src-cell dst-cell))))
 
 (defn dispatch-message [msg]
   (log/user-debug (:username msg) "receive" msg)

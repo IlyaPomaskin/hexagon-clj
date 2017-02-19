@@ -134,3 +134,15 @@
       (user-own-cell? src-cell username)
       (cell-is-empty? dst-cell)
       (cell-in-range? src-cell dst-cell))))
+
+(defn clear-cell [{ cell-eid :db/id }]
+  { :db/id cell-eid
+    :cell/owner nil })
+
+(defn occupy-cells [user-eid cells]
+  (->>
+    cells
+    (filterv #(not= (:cell/owner %1)
+                    user-eid))
+    (mapv #(hash-map :db/id (:db/id %1)
+                     :cell/owner user-eid))))
