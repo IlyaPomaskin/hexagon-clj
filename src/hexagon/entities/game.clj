@@ -111,3 +111,5 @@
     (if (> blue-count red-count)
       [red blue]
       [blue red])))
+
+;; TODO delete entries after game
