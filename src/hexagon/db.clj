@@ -51,7 +51,13 @@
   (when-let [eid (eid-by-av a v)]
     (d/transact! db [[ :db.fn/retractEntity eid ]])))
 
-(defn dump-db []
+(defn print-entities [entities]
+  (->>
+    entities
+    (sort-by :db/id)
+    clojure.pprint/pprint))
+
+(defn print-db []
   (->>
     (d/q '{:find [?e ?a ?v]
            :where [[?e ?a ?v]]} @db)
