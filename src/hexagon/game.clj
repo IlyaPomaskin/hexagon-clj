@@ -77,7 +77,7 @@
       :else (start-game (invite/get dst-username src-username)))))
 
 (defn next-player-turn [game]
-  (game/switch-turn)
+  (game/switch-turn game)
   (log/game-info "next-player-turn"))
 
 (defn win [game]

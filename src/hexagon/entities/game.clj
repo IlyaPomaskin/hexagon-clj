@@ -99,8 +99,11 @@
                      red :game/red
                      blue :game/blue
                      turn :game/turn }]
-  (d/transact! db { :db/id game-eid
-                    :game/turn (if (= turn red) blue red) }))
+  (d/transact! db [[ :db/add game-eid
+                     :game/turn (if (= (:db/id turn)
+                                       (:db/id red))
+                                  blue
+                                  red) ]]))
 
 (defn get-cells-count-by-user [game-eid user-eid]
   (d/q '[:find (count ?e) .
@@ -120,6 +123,6 @@
 
 (defn is-user-turn? [game username]
   (= (user/get-eid username)
-     (:game/turn game)))
+     (:db/id (:game/turn game))))
 
 ;; TODO delete entries after game
