@@ -60,11 +60,11 @@
       :else (invite msg))))
 
 (defn start-game [invite]
-  (game/start invite)
-  ;; TODO Remove keywords from 'invite' fieldnames
-  (send-msg "start-game" (user/get-by-eid (:invite/to invite)) :payload invite)
-  (send-msg "start-game" (user/get-by-eid (:invite/from invite)) :payload invite)
-  (log/game-info "start-game" invite))
+  (let [serialized-invite (invite/serialize invite)]
+    (game/start invite)
+    (send-msg "start-game" (:user/name (:invite/to invite)) :payload serialized-invite)
+    (send-msg "start-game" (:user/name (:invite/from invite)) :payload serialized-invite)
+    (log/game-info "start-game" serialized-invite)))
 
 (defn accept-invite [msg]
   (let [{ src-username :username
