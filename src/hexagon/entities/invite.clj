@@ -37,7 +37,7 @@
          :where [?e :invite/from ?from]] @db from-eid))
 
 (defn get-by-username [from]
-  (get-by-user-eid (user/get-eid from)))
+  (first (get-eids-by-user-eid (user/get-eid from))))
 
 (defn serialize [invite]
   { :to (:user/name (:invite/to invite))

@@ -8,49 +8,54 @@
             [hexagon.entities.game-settings :as game-settings]
             [hexagon.entities.cell :as cell]))
 
-(defn create-game-board [game]
-  (->>
-    game
-    :game/settings
-    (d/q '[:find ?map .
-           :in $ ?eid
-           :where
-           [?board :board/map ?map]
-           [?eid :game-settings/board ?board]] @db)
-    (mapv #(merge %1
-                  { :cell/owner (case (:owner %1)
-                                  :red (:game/red game)
-                                  :blue (:game/blue game)
-                                  nil)
-                    :cell/game (:db/id game) }))))
+(defn set-cell-owner [cell game]
+  (if (some? (:cell/owner cell))
+    (assoc cell :cell/owner (if (= (:cell/owner cell) :red)
+                              (:game/red game)
+                              (:game/blue game)))
+    (dissoc cell :cell/owner)))
+
+(defn board-cell->game-cell [game cell]
+  (-> cell
+      (set-cell-owner game)
+      (assoc :cell/game (:db/id game))))
+
+(defn create-game-board [game invite]
+  (->> invite
+       :invite/settings
+       :game-settings/board
+       :board/map
+       (mapv (partial board-cell->game-cell game))))
+
+(db/print-db)
 
 (defn make-game [invite]
   (let [{ from :invite/from
           to :invite/to
           settings :invite/settings } invite
-        blue (if (:game-settings/owner-first-move? settings) from to)
-        red (if (:game-settings/owner-first-move? settings) to from)
-        board (:game-settings/board settings)]
+        blue-eid (:db/id (if (:game-settings/owner-first-move? settings) from to))
+        red-eid (:db/id (if (:game-settings/owner-first-move? settings) to from))]
     { :db/id -1
-      :game/blue blue
-      :game/red red
-      :game/owner from
-      :game/settings settings
-      :game/turn blue }))
+      :game/blue blue-eid
+      :game/red red-eid
+      :game/owner (:db/id from)
+      :game/settings (:db/id settings)
+      :game/turn blue-eid }))
 
 (defn start [invite]
-  (let [{ from :invite/from
-          to :invite/to } invite
-        game (make-game invite)]
+  (let [from-eid (:db/id (:invite/from invite))
+        to-eid (:db/id (:invite/to invite))
+        game (make-game invite)
+        invites-for-deletion (into #{} (clojure.set/union (invite/get-eids-by-user-eid from-eid)
+                                                          (invite/get-eids-by-user-eid to-eid)))]
     (d/transact! db (concat
-                      [{ :db/id from
+                      [{ :db/id from-eid
                          :user/playing? true }
-                       { :db/id to
+                       { :db/id to-eid
                          :user/playing? true }
-                       { :db.fn/retractEntity (:db/id (invite/get-by-user-eid from)) }
-                       { :db.fn/retractEntity (:db/id (invite/get-by-user-eid to)) }
                        game]
-                       (create-game-board game)))))
+                      (mapv #(vec [:db.fn/retractEntity %1]) invites-for-deletion)
+                      (create-game-board game invite)))))
 
 (defn get [owner-username]
   (let [owner-eid (user/get-eid owner-username)]
