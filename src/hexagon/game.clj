@@ -81,7 +81,7 @@
   (log/game-info "next-player-turn"))
 
 (defn win [game]
-  (let [[winner-eid loser-eid] (game/get-winner game)
+  (let [[winner-eid loser-eid] (game/get-results game)
         winner-username (:user/name (user/get-by-eid winner-eid))
         loser-username (:user/name (user/get-by-eid loser-eid))]
     (send-msg "win" winner-username)
