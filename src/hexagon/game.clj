@@ -103,10 +103,11 @@
           src-cell :src-cell
           dst-cell :dst-cell } msg
         game (game/get owner)
+        game-board (cell/get-board game)
         src-send-err (partial send-msg "make-move" username :error)]
     (cond
       (nil? game) (src-send-err "game dont exists")
-      (cell/is-valid-move? game username src-cell dst-cell) (src-send-err "invalid move")
+      (cell/is-valid-move? game-board username src-cell dst-cell) (src-send-err "invalid move")
       :else (move game username src-cell dst-cell))))
 
 (defn dispatch-message [msg]

@@ -1,8 +1,11 @@
 (ns hexagon.entities.cell
   (:require [datascript.core :as d]
-            [hexagon.db :as db :refer [db]]))
+            [hexagon.db :as db :refer [db]]
+            [hexagon.entities.game :as game]
+            [hexagon.entities.user :as user]))
 
-;;
+;; tmp utils
+
 (defn create-cells [size]
   (->>
     (range 0 size)
@@ -20,6 +23,42 @@
           :cell/game 123 }))))
 
 ;; (d/transact! db (create-cells 10))
+
+;; conversion
+
+(defn even-q->cube [cell]
+  (let [{ col :cell/x
+          row :cell/y } cell
+        x col
+        z (- row (/ (+ col (bit-and col 1)) 2))
+        y (- (- x) z)]
+    { :cell/x x
+      :cell/z z
+      :cell/y y }))
+
+(defn cube->even-q [cell]
+  (let [{ x :cell/x
+          y :cell/y
+          z :cell/z } cell
+        col x
+        row (+ z (/ (+ x (bit-and x 1)) 2))]
+    { :cell/x col
+      :cell/y row }))
+
+;; distance
+
+(defn distance [src-cell dst-cell]
+  (let [{ src-x :cell/x
+          src-y :cell/y
+          src-z :cell/z } (even-q->cube src-cell)
+        { dst-x :cell/x
+          dst-y :cell/y
+          dst-z :cell/z } (even-q->cube dst-cell)]
+    (/ (+ (Math/abs (- src-x dst-x))
+          (Math/abs (- src-y dst-y))
+          (Math/abs (- src-z dst-z)))
+        2)))
+
 ;;
 
 (defn get-board [game]
@@ -56,12 +95,11 @@
   (nil? (:cell/owner cell)))
 
 (defn cell-in-range? [src-cell dst-cell]
-  ;; TODO
-  true)
+  (<= (distance src-cell dst-cell)
+      2))
 
-(defn is-valid-move? [game username src-cell-coords dst-cell-coords]
-  (let [game-board (get-board game)
-        src-cell (get-cell src-cell-coords)
+(defn is-valid-move? [game-board username src-cell-coords dst-cell-coords]
+  (let [src-cell (get-cell src-cell-coords)
         dst-cell (get-cell dst-cell-coords)]
     (and
       (is-available-cell? src-cell)
@@ -69,60 +107,3 @@
       (user-own-cell? src-cell username)
       (cell-is-empty? dst-cell)
       (cell-in-range? src-cell dst-cell))))
-
-(defn is-offset? [x]
-  (odd? x))
-
-(defn is-offset-cell? [cell]
-  (is-offset? (:x cell)))
-
-(def offset-neighbours
-  [[-1 -1] [0 -1] [1 -1]
-   [-1  0] [0  1] [1  0]])
-
-(def non-offset-neighbours
-  [[-1 0] [0 -1] [1 0]
-   [-1 1] [0  1] [1 1]])
-
-;; (get-offsets-by-cell cell1)
-
-;; (defn is-neighbour? [cell1 cell2]
-;;   (let [offsets (get-offsets-by-cell cell1)]))
-
-(defn get-neighbours [board-cells main-cell]
-  (reduce
-    (fn [neighbour-cells cell]
-      (if (is-neighbour? main-cell cell)
-        (conj neighbour-cells cell)
-        neighbour-cells))
-    #{}
-    board-cells))
-
-(defn distance-between-cells [src-cell dst-cell]
-  ;;TODO
-  true)
-
-(defn is-jump? [src-cell dst-cell]
-  (= (distance-between-cells src-cell dst-cell)
-     2))
-
-(defn get-cell [map x y]
-  (first (filterv (fn [{ cell-x :x
-                         cell-y :y }]
-                    (and (= cell-x x) (= cell-y y)))
-                  map)))
-
-(defn user-own-cell? [map color { x :x y :y }]
-  (= (:owner (get-cell map x y))
-     color))
-
-(defn cell-in-range? [map src-cell dst-cell]
-  (<= (distance-between-cells src-cell dst-cell)
-      2))
-
-(defn cell-is-empty? [map { x :x y :y }]
-  (= (:owner (get-cell map x y))
-     :none))
-
-(defn autofill-board [map]
-  true)
