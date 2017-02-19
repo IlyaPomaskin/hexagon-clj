@@ -101,6 +101,9 @@
       (nil? (cell/is-valid-move? game-board username src-cell dst-cell)) (src-send-err "invalid move")
       :else (do
               (game/move game username src-cell dst-cell)
+              ;; TODO
+              ;; (send-current-board (:game/red game))
+              ;; (send-current-board (:game/blue game))
               (if (game/movements-available? game)
                 (next-player-turn game)
                 (win game))))))
