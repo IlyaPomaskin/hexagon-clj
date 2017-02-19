@@ -5,8 +5,7 @@
             [clojure.string :as string]
             [cheshire.core :as json]
             [hexagon.log :as log]
-            [hexagon.config :as config]
-            [hexagon.entities :as entities]))
+            [hexagon.config :as config]))
 
 (defn send-msg [type username parent-msg-id & { :keys [error payload]
                                   :or {error nil, payload nil} }]
@@ -17,7 +16,7 @@
         msg (if (nil? error)
               (assoc base :payload payload)
               (assoc base :error error))
-        channel (:channel (entities/get-user username))
+        channel (:channel (users/get-user username))
         json (json/encode msg { :pretty config/PRETTY-PRINT })]
     (log/ws-debug username "send" json)
     (send! channel json)))

@@ -1,11 +1,11 @@
-(ns hexagon.entities.invites
+(ns hexagon.entities.invite
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
             [hexagon.hex :as hex]
-            [hexagon.entities.boards :as boards]
-            [hexagon.entities.timeouts :as timeouts]
+            [hexagon.entities.board :as board]
+            [hexagon.entities.timeout :as timeout]
             [hexagon.entities.game-settings :as game-settings]
-            [hexagon.entities.users :as users]))
+            [hexagon.entities.user :as user]))
 
 ;; invites
 

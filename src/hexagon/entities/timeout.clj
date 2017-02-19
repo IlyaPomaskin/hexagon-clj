@@ -1,4 +1,4 @@
-(ns hexagon.entities.timeouts
+(ns hexagon.entities.timeout
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]))
 

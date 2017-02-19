@@ -1,4 +1,4 @@
-(ns hexagon.entities.boards
+(ns hexagon.entities.board
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
             [hexagon.hex :as hex]))

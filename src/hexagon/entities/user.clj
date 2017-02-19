@@ -1,9 +1,9 @@
-(ns hexagon.entities.users
+(ns hexagon.entities.user
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
             [hexagon.hex :as hex]
-            [hexagon.entities.boards :as boards]
-            [hexagon.entities.timeouts :as timeouts]))
+            [hexagon.entities.board :as board]
+            [hexagon.entities.timeout :as timeout]))
 
 ;; users
 
