@@ -12,22 +12,22 @@
             [hexagon.entities.game :as game]
             [hexagon.entities.cell :as cell]))
 
-(defn send-msg [type username parent-msg-id & { :keys [error payload]
+(defn send-msg [type username & { :keys [error payload]
                                   :or {error nil, payload nil} }]
   (let [base { :type type
                :timestamp (System/currentTimeMillis)
-               :parent-msg-id parent-msg-id
+               ;; :parent-msg-id parent-msg-id
                :status (if (nil? error) "OK" "ERR") }
         msg (if (nil? error)
               (assoc base :payload payload)
               (assoc base :error error))
-        channel (:channel (user/get username))
+        channel (:user/channel (user/get username))
         json (json/encode msg { :pretty config/PRETTY-PRINT })]
     (log/ws-debug username "send" json)
     (send! channel json)))
 
 (defn add-user [username channel]
-  (log/game-info username " enter")
+  (log/game-info username "enter")
   (user/add username channel))
 
 (defn delete-user [username]
