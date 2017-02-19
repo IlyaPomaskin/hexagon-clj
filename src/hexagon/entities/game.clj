@@ -27,8 +27,6 @@
        :board/map
        (mapv (partial board-cell->game-cell game))))
 
-(db/print-db)
-
 (defn make-game [invite]
   (let [{ from :invite/from
           to :invite/to
