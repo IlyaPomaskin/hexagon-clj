@@ -52,7 +52,7 @@
                                  {:cell/x 4, :cell/y 4, :cell/type :normal, :cell/owner :blue}] }]))
 
 (def default
-  (db/eid-by-av :board/name "classic"))
+  (db/eid-by-av :board/name "test"))
 
 (defn get [name]
   (db/entity-by-av :board/name name))
