@@ -102,7 +102,9 @@
         [?e ?a ?v]
         [?e :cell/game ?game]]
       @db)
-    (group-by :cell/x)))
+    (sort-by :cell/y)
+    (group-by :cell/x)
+    (into (sorted-map))))
 
 (defn get-cell-by-coords [game-board x y]
   (->
@@ -111,14 +113,14 @@
     (clojure.core/get y)))
 
 (defn get-cell [game-board cell]
-  (get-cell-by-coords game-board (:cell/x cell) (:cell/y cell)))
+  (get-cell-by-coords game-board (:x cell) (:y cell)))
 
 (defn is-available-cell? [cell]
   (= (:cell/type cell)
      :normal))
 
 (defn user-own-cell? [cell username]
-  (= (:cell/owner cell)
+  (= (:db/id (:cell/owner cell))
      (user/get-eid username)))
 
 (defn cell-is-empty? [cell]
