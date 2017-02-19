@@ -5,7 +5,11 @@
             [clojure.string :as string]
             [cheshire.core :as json]
             [hexagon.log :as log]
-            [hexagon.config :as config]))
+            [hexagon.config :as config]
+            [hexagon.entities.board :as board]
+            [hexagon.entities.user :as user]
+            [hexagon.entities.invite :as invite]
+            [hexagon.entities.game :as game]))
 
 (defn send-msg [type username parent-msg-id & { :keys [error payload]
                                   :or {error nil, payload nil} }]
@@ -16,29 +20,29 @@
         msg (if (nil? error)
               (assoc base :payload payload)
               (assoc base :error error))
-        channel (:channel (users/get-user username))
+        channel (:channel (user/get username))
         json (json/encode msg { :pretty config/PRETTY-PRINT })]
     (log/ws-debug username "send" json)
     (send! channel json)))
 
 (defn add-user [username channel]
   (log/game-info username " enter")
-  (entities/add-user username channel))
+  (user/add username channel))
 
 (defn delete-user [username]
-  (log/game-info username " exit")
-  (entities/delete-user username))
+  (log/game-info username "exit")
+  (user/delete username))
 
 (defn get-users-list [{ username :username }]
-  (send-msg "users-list" username :payload (entities/get-usernames)))
+  (send-msg "users-list" username :payload (user/get-usernames)))
 
 (defn get-boards [{ username :username }]
-  (send-msg "boards" username :payload entities/get-boards))
+  (send-msg "boards" username :payload board/get-boards))
 
 (defn invite [{ src-username :username
                 dst-username :dst
                 game-settings :game-settings }]
-  (entities/add-invite src-username dst-username game-settings)
+  (invite/add src-username dst-username game-settings)
   (send-msg "invite" dst-username :payload { :src src-username
                                              :game-settings game-settings }))
 
@@ -48,17 +52,17 @@
           game-settings :game-settings } msg
         src-send-err (partial send-msg "send-invite" src-username :error)]
     (cond
-      (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
+      (not (user/exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (entities/user-playing? dst-username) (src-send-err  "user already playing")
-      (entities/get-invite-by-username src-username) (src-send-err "invite already sent")
+      (user/playing? dst-username) (src-send-err  "user already playing")
+      (invite/get-by-username src-username) (src-send-err "invite already sent")
       :else (invite src-username dst-username game-settings))))
 
 (defn start-game [invite]
-  (entities/start-game invite)
+  (game/start invite)
   ;; TODO Remove keywords from 'invite' fieldnames
-  (send-msg "start-game" (entities/get-user-by-eid (:invite/to invite)) :payload invite)
-  (send-msg "start-game" (entities/get-user-by-eid (:invite/from invite)) :payload invite)
+  (send-msg "start-game" (user/get-by-eid (:invite/to invite)) :payload invite)
+  (send-msg "start-game" (user/get-by-eid (:invite/from invite)) :payload invite)
   (log/game-info "start-game" invite))
 
 (defn accept-invite [msg]
@@ -66,10 +70,10 @@
           dst-username :dst } msg
         src-send-err (partial send-msg "accept-invite" src-username :error)]
     (cond
-      (not (entities/user-exists? dst-username)) (src-send-err  "user not found")
+      (not (user/exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (entities/invite-exists? dst-username src-username) (src-send-err "user canceled invite")
-      :else (start-game (entities/get-invite dst-username src-username)))))
+      (invite/exists? dst-username src-username) (src-send-err "user canceled invite")
+      :else (start-game (invite/get dst-username src-username)))))
 
 (defn next-player-turn [game]
   ;; TODO
@@ -97,11 +101,11 @@
           owner :game-owner
           src-cell :src-cell
           dst-cell :dst-cell } msg
-        game (entities/get-game owner)
+        game (game/get owner)
         src-send-err (partial send-msg "make-move" username :error)]
     (cond
       (nil? game) (src-send-err "game dont exists")
-      (entities/is-valid-move? game username src-cell dst-cell) (src-send-err "invalid move")
+      (game/is-valid-move? game username src-cell dst-cell) (src-send-err "invalid move")
       :else (move game username src-cell dst-cell))))
 
 (defn dispatch-message [msg]

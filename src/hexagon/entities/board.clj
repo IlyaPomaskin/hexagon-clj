@@ -1,27 +1,26 @@
 (ns hexagon.entities.board
   (:require [datascript.core :as d]
-            [hexagon.db :as db :refer [db]]
-            [hexagon.hex :as hex]))
+            [hexagon.db :as db :refer [db]]))
 
-;; boards
+(defonce initial-boards
+  (d/transact! db [{ :board/name "classic"
+                     :board/map [{ :x 1
+                                   :y 2
+                                   :type :normal
+                                   :owner nil }]}
+                   { :board/name "modern"
+                     :board/map [{ :x 2
+                                   :y 1
+                                   :owner nil }]}]))
 
-(d/transact! db [{ :board/name "classic"
-                   :board/map [{ :x 1
-                                 :y 2
-                                 :type :normal
-                                 :owner nil }]}
-                 { :board/name "modern"
-                   :board/map [{ :x 2
-                                 :y 1
-                                 :owner nil }]}])
+(def default
+  (db/eid-by-av :board/name "classic"))
 
-(def default-board (db/eid-by-av :board/name "classic"))
-
-(defn get-board [name]
+(defn get [name]
   (db/entity-by-av :board/name name))
 
-(defn board-exists? [board]
-  (some? (get-board board)))
+(defn exists? [board]
+  (some? (get board)))
 
 ;; TODO return map instead of vec
 (defn get-boards []

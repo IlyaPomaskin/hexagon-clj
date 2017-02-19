@@ -1,35 +1,32 @@
 (ns hexagon.entities.user
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
-            [hexagon.hex :as hex]
             [hexagon.entities.board :as board]
             [hexagon.entities.timeout :as timeout]))
 
-;; users
-
-(defn get-user [username]
+(defn get [username]
   (db/entity-by-av :user/name username))
 
-(defn get-user-eid [username]
+(defn get-eid [username]
   (db/eid-by-av :user/name username))
 
-(defn get-user-by-eid [eid]
+(defn get-by-eid [eid]
   (db/entity-by-eid eid))
 
-(defn add-user [username channel]
+(defn add [username channel]
   (d/transact! db [{ :user/name username
                      :user/channel channel
                      :user/playing? false }]))
 
-(defn delete-user [username]
+(defn delete [username]
   (db/retract-by-av :user/name username))
 
-(defn user-exists? [username]
+(defn exists? [username]
   (some? (db/eid-by-av :user/name username)))
 
 (defn get-usernames []
   (d/q '[:find [?name ...]
          :where [_ :user/name ?name]] @db))
 
-(defn user-playing? [username]
+(defn playing? [username]
   (:playing? (db/entity-by-av :user/name username)))

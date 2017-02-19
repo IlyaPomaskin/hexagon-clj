@@ -1,9 +1,11 @@
 (ns hexagon.entities.game
   (:require [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
-            [hexagon.hex :as hex]
             [hexagon.entities.board :as board]
-            [hexagon.entities.timeout :as timeout]))
+            [hexagon.entities.timeout :as timeout]
+            [hexagon.entities.invite :as invite]
+            [hexagon.entities.user :as user]
+            [hexagon.entities.game-settings :as game-settings]))
 
 (defn board-cell->game-cell [game cell]
   { :cell/x (:x cell)
@@ -37,7 +39,7 @@
       :game/settings settings
       :game/turn blue }))
 
-(defn start-game [invite]
+(defn start [invite]
   (let [{ from :invite/from
           to :invite/to } invite
         game (make-game invite)]
@@ -46,21 +48,18 @@
                          :user/playing? true }
                        { :db/id to
                          :user/playing? true }
-                       { :db.fn/retractEntity (:db/id (get-invite-by-user-eid from)) }
-                       { :db.fn/retractEntity (:db/id (get-invite-by-user-eid to)) }
+                       { :db.fn/retractEntity (:db/id (invite/get-by-user-eid from)) }
+                       { :db.fn/retractEntity (:db/id (invite/get-by-user-eid to)) }
                        game]
                        (create-game-board-cells game)))))
 
-(defn get-game [owner-username]
-  (let [owner-eid (get-user-eid owner-username)]
+(defn get [owner-username]
+  (let [owner-eid (user/get-eid owner-username)]
     (db/entity-by-av :game/owner owner-username)))
 
-(defn get-game-settings [game]
-  (db/entity-by-eid (:game/settings game)))
-
 (defn get-user-color [game username]
-  (let [settings (get-game-settings game)
-        user-eid (get-user-eid username)]
+  (let [settings (game-settings/get-by-game game)
+        user-eid (user/get-eid username)]
     (if (and (= (:game/owner game) user-eid)
              (:game-settings/owner-first-move? settings))
       :blue
@@ -78,9 +77,10 @@
   true)
 
 (defn is-valid-move? [game username src-cell dst-cell]
-  (let [map (:game/map game)
-        user-color (get-user-color game username)]
-    (and
-      (hex/user-own-cell? map user-color src-cell)
-      (hex/cell-in-range? map src-cell dst-cell)
-      (hex/cell-is-empty? map dst-cell))))
+;;   (let [map (:game/map game)
+;;         user-color (get-user-color game username)]
+;;     (and
+;;       (hex/user-own-cell? map user-color src-cell)
+;;       (hex/cell-in-range? map src-cell dst-cell)
+;;       (hex/cell-is-empty? map dst-cell))))
+  true)
