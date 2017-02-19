@@ -14,3 +14,8 @@
 
 (defn get-by-game [game]
   (db/entity-by-eid (:game/settings game)))
+
+(defn serialize [settings]
+  { :board (:db/id (:game-settings/board settings))
+    :timeout (:db/id (:game-settings/timeout settings))
+    :owner-first-move? (:game-settings/owner-first-move? settings) })
