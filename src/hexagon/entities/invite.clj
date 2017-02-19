@@ -28,8 +28,6 @@
   (when-let [eid (get-eid from to)]
     (d/entity @db eid)))
 
-(get "test1" "test2")
-
 (defn exists? [from to]
   (some? (get from to)))
 
