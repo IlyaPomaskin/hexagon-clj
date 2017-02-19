@@ -16,6 +16,7 @@
       (fn [{ x :x y :y}]
         { :cell/x x
           :cell/y y
+          :cell/type :normal
           :cell/game 123 }))))
 
 ;; (d/transact! db (create-cells 10))
@@ -34,14 +35,40 @@
       @db)
     (group-by :cell/x)))
 
-(defn is-valid-move? [game username src-cell dst-cell]
-;;   (let [map (:game/map game)
-;;         user-color (get-user-color game username)]
-;;     (and
-;;       (hex/user-own-cell? map user-color src-cell)
-;;       (hex/cell-in-range? map src-cell dst-cell)
-;;       (hex/cell-is-empty? map dst-cell))))
+(defn get-cell-by-coords [game-board x y]
+  (->
+    game-board
+    (clojure.core/get x [])
+    (clojure.core/get y)))
+
+(defn get-cell [game-board cell]
+  (get-cell-by-coords game-board (:cell/x cell) (:cell/y cell)))
+
+(defn is-available-cell? [cell]
+  (= (:cell/type cell)
+     :normal))
+
+(defn user-own-cell? [cell username]
+  (= (:cell/owner cell)
+     (user/get-eid username)))
+
+(defn cell-is-empty? [cell]
+  (nil? (:cell/owner cell)))
+
+(defn cell-in-range? [src-cell dst-cell]
+  ;; TODO
   true)
+
+(defn is-valid-move? [game username src-cell-coords dst-cell-coords]
+  (let [game-board (get-board game)
+        src-cell (get-cell src-cell-coords)
+        dst-cell (get-cell dst-cell-coords)]
+    (and
+      (is-available-cell? src-cell)
+      (is-available-cell? dst-cell)
+      (user-own-cell? src-cell username)
+      (cell-is-empty? dst-cell)
+      (cell-in-range? src-cell dst-cell))))
 
 (defn is-offset? [x]
   (odd? x))
