@@ -59,6 +59,33 @@
           (Math/abs (- src-z dst-z)))
         2)))
 
+;; neighbours
+
+(def offset-neighbours
+  [[-1 -1] [0 -1] [1 -1]
+   [-1  0] [0  1] [1  0]])
+
+(def non-offset-neighbours
+  [[-1 0] [0 -1] [1 0]
+   [-1 1] [0  1] [1 1]])
+
+(defn is-offset-cell? [cell]
+  (odd? (:cell/x cell)))
+
+(defn get-neighbours [game-board cell]
+  (let [{ x :cell/x
+          y :cell/y } cell]
+    (reduce
+      (fn [neighbours [offset-x offset-y]]
+        (let [offset-cell (get-cell-by-coords game-board (+ x offset-x) (+ y offset-y))]
+          (if (is-available-cell? offset-cell)
+            (conj neighbours offset-cell)
+            neighbours)))
+      #{}
+      (if (is-offset-cell? cell)
+        offset-neighbours
+        non-offset-neighbours))))
+
 ;;
 
 (defn get-board [game]
