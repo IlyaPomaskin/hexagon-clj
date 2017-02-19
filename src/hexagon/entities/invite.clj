@@ -31,8 +31,10 @@
 (defn exists? [from to]
   (some? (get-eid from to)))
 
-(defn get-by-user-eid [from]
-  (db/entity-by-av :invite/from from))
+(defn get-eids-by-user-eid [from-eid]
+  (d/q '[:find [?e ...]
+         :in $ ?from
+         :where [?e :invite/from ?from]] @db from-eid))
 
 (defn get-by-username [from]
   (get-by-user-eid (user/get-eid from)))
