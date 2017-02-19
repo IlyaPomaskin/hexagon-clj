@@ -7,7 +7,7 @@
 (defn create-game-settings [settings]
   (let [board-eid (-> settings :board board/get :db/id (or board/default))
         timeout-eid (-> settings :timeout timeout/get :db/id (or timeout/default))
-        owner-first-move? (boolean (:owner-first-move settings))]
+        owner-first-move? (boolean (:owner-first-move? settings))]
     { :game-settings/board board-eid
       :game-settings/timeout board-eid
       :game-settings/owner-first-move? owner-first-move? }))
