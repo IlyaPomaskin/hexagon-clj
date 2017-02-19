@@ -73,7 +73,7 @@
     (cond
       (not (user/exists? dst-username)) (src-send-err  "user not found")
       (= src-username dst-username) (src-send-err  "wrong user")
-      (invite/exists? dst-username src-username) (src-send-err "user canceled invite")
+      (false? (invite/exists? dst-username src-username)) (src-send-err "user canceled invite")
       :else (start-game (invite/get dst-username src-username)))))
 
 (defn next-player-turn [game]
