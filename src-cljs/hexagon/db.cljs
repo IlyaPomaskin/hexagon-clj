@@ -34,7 +34,7 @@
 
 (def db (d/create-conn schema))
 
-(defn reset! []
+(defn reset-db! []
   (set! db (d/create-conn schema)))
 
 ;; utils
