@@ -4,6 +4,8 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]
             [cheshire.core :as json]
+            [datascript.core :as d]
+            [hexagon.db :as db :refer [db]]
             [hexagon.log :as log]
             [hexagon.config :as config]
             [hexagon.entities.board :as board]
@@ -28,11 +30,18 @@
 
 (defn add-user [username channel]
   (log/game-info username "enter")
-  (user/add username channel))
+  (user/add username channel)
+  (let [eid (db/eid-by-av :user/name username)
+        filter-datoms (partial filterv (get @user/filters eid))]
+    (send-msg "datoms" username :payload (-> @db (d/datoms :aevt) filter-datoms pr-str))
+    (d/listen! db eid #(if-let [datoms (-> %1 :tx-data filter-datoms pr-str)]
+                         (send-msg "datoms" username :payload datoms)))))
 
 (defn delete-user [username]
-  (log/game-info username "exit")
-  (user/delete username))
+  (let [user-eid (db/eid-by-av :user/name username)]
+    (log/game-info username "exit")
+    (d/unlisten! db user-eid)
+    (user/delete username)))
 
 (defn get-users-list [{ username :username }]
   (send-msg "users-list" username :payload (user/get-usernames)))
