@@ -1,5 +1,7 @@
 (ns hexagon.main
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [datascript.core :as d]
+            [hexagon.db :as db :refer [db]]))
 
 (enable-console-print!)
 
