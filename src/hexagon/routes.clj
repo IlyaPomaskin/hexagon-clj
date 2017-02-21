@@ -18,3 +18,5 @@
       (wrap-base-url)))
 
 (defonce serv (run-server app {:port 8080}))
+
+(defn -main [] (println "Started"))
