@@ -13,13 +13,19 @@
 (defn get-by-eid [eid]
   (db/entity-by-eid eid))
 
+(def filters (atom {}))
+
 (defn add [username channel]
   (d/transact! db [{ :user/name username
                      :user/channel channel
-                     :user/playing? false }]))
+                     :user/playing? false }])
+  (let [eid (db/eid-by-av :user/name username)]
+    (swap! filters assoc eid (create-user-datoms-filter eid))))
 
 (defn delete [username]
-  (db/retract-by-av :user/name username))
+  (let [eid (db/eid-by-av :user/name username)]
+    (swap! filters dissoc eid)
+    (d/transact! db [[ :db.fn/retractEntity eid ]])))
 
 (defn exists? [username]
   (some? (db/eid-by-av :user/name username)))
