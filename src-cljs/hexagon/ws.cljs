@@ -2,6 +2,12 @@
 
 (defonce chan (atom nil))
 
+(defn send! [msg]
+  (->> msg
+       cljs.core/clj->js
+       (. js/JSON stringify)
+       (.send @chan)))
+
 (defn make! [username handler-fn]
   (if-let [ws (js/WebSocket. (str "ws://" (.-host js/location) "/ws?username=" username))]
     (do
