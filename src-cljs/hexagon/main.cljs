@@ -13,18 +13,24 @@
          cljs.reader/read-string
          (d/transact! db))))
 
-(rum/defcs stateful < (rum/local 0 ::key)
-  [state label]
-  (let [local-atom (::key state)]
-    [:div { :on-click (fn [_] (swap! local-atom inc)) }
-     label ": " @local-atom]))
+(rum/defcs username-input < (rum/local "" ::username) [{ username ::username }]
+  [ :form { :on-submit (fn [e]
+                         (js/console.log @username)
+                         (.preventDefault e)) }
+    [:label { :html-for "username" } "Enter username"]
+    [:br]
+    [:input { :type "text"
+              :id "username"
+              :value @username
+              :on-change (fn [e] (reset! username (.. e -target -value))) }]
+    [:input { :type "submit" }]])
 
 (defn init! []
   (when-some [ws @ws/chan]
              (do
                (.close ws)
-               (db/reset!)))
+               (db/reset-db!)))
   (ws/make! "username2" handle-message)
-  (rum/mount (stateful "Click count") (. js/document (querySelector "#container"))))
+  (rum/mount (username-input) (. js/document (querySelector "#container"))))
 
 (init!)
