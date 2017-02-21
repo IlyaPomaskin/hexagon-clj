@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [datascript "0.15.5"]
-;;                  [org.clojure/clojurescript "1.9.293"]
+                 [org.clojure/clojurescript "1.9.293"]
+                 [lein-figwheel "0.5.9"]
                  [javax.servlet/servlet-api "2.5"]
                  [http-kit "2.2.0"]
                  [compojure "1.1.6"]
@@ -15,17 +16,19 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [lein-light-nrepl "0.3.3"]
                  [org.omcljs/om "0.9.0"]]
-;;   :plugins [[lein-cljsbuild "1.1.5"]
-;;             [lein-ring "0.8.7"]]
-;;   :cljsbuild {
-;;     :builds [{
-;;         :source-paths ["src-cljs"]
-;;         :compiler {
-;;           :output-to "resources/public/js/main.js"
-;;           :optimizations :whitespace
-;;           :pretty-print true}}]}
+  :plugins [[lein-cljsbuild "1.1.5"]
+            [lein-ring "0.8.7"]
+            [lein-figwheel "0.5.9"]]
+  :source-paths ["src"]
   :main hexagon.routes
-;;   :aot [hexagon.routes]
-  :repl-options { :port 35975
-                  :repl-verbose true
-                  :nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]})
+  :cljsbuild { :builds [{ :id "main"
+                          :source-paths ["src-cljs"]
+                          :figwheel true
+                          :compiler { :main "hexagon.main"
+                                      :asset-path "js/out"
+                                      :output-to "resources/public/js/main.js"
+                                      :output-dir "resources/public/js/out"
+                                      :optimizations :none
+                                      :verbose true
+                                      :pretty-print true
+                                      :source-map true }}]})
