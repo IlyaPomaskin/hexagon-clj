@@ -2,7 +2,6 @@
   (:use compojure.core
         org.httpkit.server)
   (:require [cheshire.core :as json]
-            [clojure.string :as string]
             [hexagon.log :as log]
             [hexagon.game :as game]))
 
