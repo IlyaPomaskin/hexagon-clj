@@ -15,7 +15,7 @@
                  [cheshire "5.7.0"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [lein-light-nrepl "0.3.3"]
-                 [org.omcljs/om "0.9.0"]]
+                 [rum "0.10.8"]]
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-ring "0.8.7"]
             [lein-figwheel "0.5.9"]]
