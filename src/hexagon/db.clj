@@ -1,5 +1,6 @@
 (ns hexagon.db
-  (:require [datascript.core :as d]))
+  (:require [datascript.core :as d]
+            [clojure.pprint :refer [pprint]]))
 
 (def schema
   { :user/name { :db/cardinality :db.cardinality/one
@@ -56,7 +57,7 @@
   (->>
     entities
     (sort-by :db/id)
-    clojure.pprint/pprint))
+    pprint))
 
 (defn print-db []
   (->>
@@ -64,4 +65,4 @@
            :where [[?e ?a ?v]]} @db)
     (sort-by #(nth %1 1))
     (sort-by first)
-    clojure.pprint/pprint))
+    pprint))

@@ -62,6 +62,21 @@
           (Math/abs (- src-z dst-z)))
         2)))
 
+;; cell
+
+(defn get-cell-by-coords [game-board x y]
+  (->
+    game-board
+    (clojure.core/get x [])
+    (clojure.core/get y)))
+
+(defn get-cell [game-board cell]
+  (get-cell-by-coords game-board (:x cell) (:y cell)))
+
+(defn is-available-cell? [cell]
+  (= (:cell/type cell)
+     :normal))
+
 ;; neighbours
 
 (def offset-neighbours
@@ -105,19 +120,6 @@
     (sort-by :cell/y)
     (group-by :cell/x)
     (into (sorted-map))))
-
-(defn get-cell-by-coords [game-board x y]
-  (->
-    game-board
-    (clojure.core/get x [])
-    (clojure.core/get y)))
-
-(defn get-cell [game-board cell]
-  (get-cell-by-coords game-board (:x cell) (:y cell)))
-
-(defn is-available-cell? [cell]
-  (= (:cell/type cell)
-     :normal))
 
 (defn user-own-cell? [cell username]
   (= (:db/id (:cell/owner cell))
