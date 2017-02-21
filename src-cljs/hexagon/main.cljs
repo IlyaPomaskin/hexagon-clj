@@ -1,26 +1,15 @@
 (ns hexagon.main
-  (:require [om.core :as om :include-macros true]
-            [om.dom :as D :include-macros true]))
+  (:require [rum.core :as rum]))
 
 (enable-console-print!)
 
-(defn widget [props owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-                {:value "" :count 0})
-    om/IRenderState
-    (render-state [_ {:keys [value]}]
-                  (D/div nil
-                         (D/label nil "Only numeric : ")
-                         (D/input #js
-                                  {:value value
-                                   :onChange
-                                   #(let [new-value (-> % .-target .-value)]
-                                      (if (js/isNaN new-value)
-                                        (om/set-state! owner :value value)
-                                        (om/set-state! owner :value new-value)))})))))
+(rum/defcs stateful < (rum/local 0 ::key)
+  [state label]
+  (let [local-atom (::key state)]
+    [:div { :on-click (fn [_] (swap! local-atom inc)) }
+     label ": " @local-atom]))
 
-(om/root widget
-         {}
-         {:target (. js/document (querySelector "#container"))})
+(defn init! []
+  (rum/mount (stateful "Click count") (. js/document (querySelector "#container"))))
+
+(init!)
