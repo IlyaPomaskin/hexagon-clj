@@ -9,9 +9,9 @@
 (defn handle-message [msg]
   (when (= (.-type msg) "datoms")
     (->> msg
-       .-payload
-       cljs.reader/read-string
-       (d/transact! db))))
+         .-payload
+         cljs.reader/read-string
+         (d/transact! db))))
 
 (rum/defcs stateful < (rum/local 0 ::key)
   [state label]
