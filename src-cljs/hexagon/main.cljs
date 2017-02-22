@@ -2,7 +2,8 @@
   (:require [rum.core :as rum]
             [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
-            [hexagon.ws :as ws]))
+            [hexagon.ws :as ws]
+            [hexagon.ui :as ui]))
 
 (enable-console-print!)
 
@@ -13,24 +14,12 @@
          cljs.reader/read-string
          (d/transact! db))))
 
-(rum/defcs username-input < (rum/local "" ::username) [{ username ::username }]
-  [ :form { :on-submit (fn [e]
-                         (js/console.log @username)
-                         (.preventDefault e)) }
-    [:label { :html-for "username" } "Enter username"]
-    [:br]
-    [:input { :type "text"
-              :id "username"
-              :value @username
-              :on-change (fn [e] (reset! username (.. e -target -value))) }]
-    [:input { :type "submit" }]])
-
-(defn init! []
+(defn init! [usr]
   (when-some [ws @ws/chan]
              (do
                (.close ws)
                (db/reset-db!)))
-  (ws/make! "username2" handle-message)
-  (rum/mount (username-input) (. js/document (querySelector "#container"))))
+  (ws/make! usr handle-message)
+  (rum/mount (ui/root db) (js/document.querySelector "#container")))
 
-(init!)
+(init! "username2")
