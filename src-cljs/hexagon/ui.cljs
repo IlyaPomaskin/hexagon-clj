@@ -1,36 +1,85 @@
 (ns hexagon.ui
-  (:require [rum.core :as rum]
+  (:require [clojure.string :as string]
+            [rum.core :as rum]
             [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
             [hexagon.ws :as ws]))
 
-(rum/defcs username-input < (rum/local "" ::username) [{ username ::username }]
-  [ :form { :on-submit (fn [e]
-                         (js/console.log @username)
-                         (.preventDefault e)) }
-    [:label { :html-for "username" } "Enter username"]
-    [:br]
-    [:input { :type "text"
-              :id "username"
-              :value @username
-              :on-change (fn [e] (reset! username (.. e -target -value))) }]
-    [:input { :type "submit" }]])
+(defn cn [& args]
+  (->> args
+       (filterv #(not (or (nil? %1) (false? %1) (string/blank? %1))))
+       (string/join " ")))
 
-(defn board [board-eid]
-  (let [b (d/entity @db board-eid)]
-    [:span (:board/name b)]))
+;; user list screen
 
-(defn boards-list []
-  (let [boards (d/q '[:find [?e ...]
+(defn user [user-eid selected?]
+  (let [b (d/entity @db user-eid)]
+    [:div { :class (cn "c-card__item"
+                       (when selected?
+                         "c-card__item--active")) } (:user/name b)]))
+
+(rum/defc users-list [selected-user-eid on-user-select]
+  (let [users (d/q '[:find [?e ...]
+                     :where [?e :user/name ?v]] @db)]
+    [:ul.c-card.c-card--menu
+     (map (fn [eid] [:li { :key eid
+                           :on-click #(on-user-select (when-not (= selected-user-eid eid) eid)) }
+                     (user eid (= selected-user-eid eid))])
+          users)]))
+
+(rum/defc boards-select [board-eid on-change]
+  (let [boards (d/q '[:find ?e ?v
                       :where
                       [?e :board/name ?v]] @db)]
-    [:ul
-     (mapv #(vector [:li { :key %1 } (board %1)]) boards)]))
+    [:.o-form-element
+     [:label.c-label { :for "boards-list" } "Game board"]
+     [:select.c-field
+      { :id "boards-list"
+        :on-change #(on-change (.. %1 -target -value)) }
+      (map (fn [[eid name]] [:option { :key eid
+                                       :value name } name])
+           boards)]]))
 
-(rum/defc game-field [] [:div])
+(rum/defc first-move-toggle [toggled? on-change]
+  [:.o-form-element
+   [:label.c-toggle { :on-click #(on-change (not toggled?)) }
+    [:input { :type "checkbox"
+              :checked (not toggled?) }]
+    [:.c-toggle__track [:.c-toggle__handle]]
+    "Opponent first move"]])
 
-(rum/defc root < rum/reactive [db]
+(rum/defcs game-settings < (rum/local { :board (d/q '[:find ?e . :where [?e :board/name ?v]] @db)
+                                        :owner-first-move? true } ::settings)
+  [{ settings ::settings } user-eid]
+  [:form { :on-submit #(do
+                         (.preventDefault %1)
+                         (ws/send! ["smthing" @settings])) }
+   [:fieldset.o-fieldset
+    [:h3.c-heading.u-centered (str "Invite user #" user-eid)]
+    (boards-select (:board-eid @settings) #(swap! settings assoc :board-eid %1))
+    (first-move-toggle (:owner-first-move? @settings) #(swap! settings assoc :owner-first-move? %1))
+    [:.o-form-element
+     [:input.c-button { :type "submit"
+                        :value "Invite" }]]]])
+
+(rum/defcs users-screen < (rum/local nil ::selected-user-eid)
+  [{ selected-user-eid ::selected-user-eid }]
+  [:.o-grid
+   [:.o-grid__cell.o-grid__cell--width-33
+    (users-list @selected-user-eid #(reset! selected-user-eid %1))]
+   [:.o-grid__cell.o-grid__cell--width-66
+    (if (some? @selected-user-eid)
+      (game-settings @selected-user-eid)
+      [:.u-centered  "Select an user"])]])
+
+;; game screen
+
+;; root
+
+(rum/defcs root < rum/reactive (rum/local users-screen ::screen)
+  [{ screen ::screen } db]
   (let [db-sub (rum/react db)]
-    [:div
-     [:dev.left (boards-list)]
-     [:div.right (game-field)]]))
+    [:.o-container.o-container--medium
+     ;; [:div { :on-click #(reset! screen boards-list) } "Boards list"]
+     [:div { :on-click #(reset! screen users-screen) } "Users list"]
+     (@screen)]))

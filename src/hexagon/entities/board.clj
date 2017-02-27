@@ -52,7 +52,8 @@
                                  {:cell/x 4, :cell/y 4, :cell/type :normal, :cell/owner :blue}] }]))
 
 (def default
-  (db/eid-by-av :board/name "test"))
+  (d/q '[:find ?e .
+         :where [?e :board/name ?v]] @db))
 
 (defn get [name]
   (db/entity-by-av :board/name name))
