@@ -6,12 +6,12 @@
 
 (def head
   [:head
-      [:title "Hexagon"]
-      [:link {:rel "stylesheet"
-              :href "https://unpkg.com/blaze"
-              :crossorigin "anonymous"}]
-      [:meta {:name "viewport"
-              :content "width=device-width, initial-scale=1"}]])
+   [:title "Hexagon"]
+   [:link { :rel "stylesheet"
+            :href "https://unpkg.com/blaze"
+            :crossorigin "anonymous" }]
+   [:meta { :name "viewport"
+            :content "width=device-width, initial-scale=1" }]])
 
 (defn body [additional]
   [:body.c-text
