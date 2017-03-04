@@ -25,7 +25,6 @@
   (context "/" []
            (GET "/" [] (view/index-page))
            (POST "/" [] authorize))
-  (GET "/app" [] (view/game-page))
   (GET "/ws" request (ws/ws-handler request))
   (route/resources "/")
   (route/not-found "Page not found"))
