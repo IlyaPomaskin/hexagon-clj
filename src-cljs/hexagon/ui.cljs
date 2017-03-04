@@ -3,7 +3,8 @@
             [rum.core :as rum]
             [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
-            [hexagon.ws :as ws]))
+            [hexagon.ws :as ws]
+            [hexagon.utils :as utils]))
 
 (defn cn [& args]
   (->> args
@@ -19,13 +20,17 @@
                          "c-card__item--active")) } (:user/name b)]))
 
 (rum/defc users-list [selected-user-eid on-user-select]
-  (let [users (d/q '[:find [?e ...]
-                     :where [?e :user/name ?v]] @db)]
-    [:ul.c-card.c-card--menu
-     (map (fn [eid] [:li { :key eid
-                           :on-click #(on-user-select (when-not (= selected-user-eid eid) eid)) }
-                     (user eid (= selected-user-eid eid))])
-          users)]))
+  (let [all-users (d/q '[:find [?e ...]
+                         :where [?e :user/name ?name]] @db)
+        current-eid (utils/get-current-user-eid)
+        users (filter #(not= current-eid %1) all-users)]
+    (if (empty? users)
+      [:.u-centered  "No users :("]
+      [:ul.c-card.c-card--menu
+       (map (fn [eid] [:li { :key eid
+                             :on-click #(on-user-select (when-not (= selected-user-eid eid) eid)) }
+                       (user eid (= selected-user-eid eid))])
+            users)])))
 
 (rum/defc boards-select [board-eid on-change]
   (let [boards (d/q '[:find ?e ?v
