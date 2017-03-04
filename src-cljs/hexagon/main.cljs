@@ -3,11 +3,10 @@
             [datascript.core :as d]
             [hexagon.db :as db :refer [db]]
             [hexagon.ws :as ws]
-            [hexagon.ui :as ui]))
+            [hexagon.ui :as ui]
+            [hexagon.utils :as utils]))
 
 (enable-console-print!)
-
-(def username (-> js/window .-__INITIAL_STATE__ .-username))
 
 (defn handle-message [msg]
   (when (= (.-type msg) "datoms")
@@ -18,7 +17,7 @@
 
 (defn init! []
   (when-some [ws @ws/chan] (.close ws))
-  (ws/make! username handle-message)
+  (ws/make! utils/current-username handle-message)
   (rum/mount (ui/root db) (js/document.querySelector "#container")))
 
 (init!)
