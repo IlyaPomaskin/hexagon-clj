@@ -19,7 +19,7 @@
 (defn authorize [{ form :form-params }]
   (if-let [errors (validate-form form)]
     (view/index-page errors)
-    (println "OK create sessions" form)))
+    (view/game-page form)))
 
 (defroutes main-routes
   (context "/" []
