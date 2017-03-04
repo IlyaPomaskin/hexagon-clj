@@ -33,6 +33,10 @@
   (-> (handler/site main-routes)
       (wrap-base-url)))
 
-(defonce serv (run-server app {:port 8080}))
+(defonce server (atom (run-server app { :port 8080 })))
+
+(defn stop-server []
+  (when-not (nil? @server)
+    (reset! server nil)))
 
 (defn -main [] (println "Started"))
