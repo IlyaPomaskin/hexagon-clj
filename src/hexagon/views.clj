@@ -4,18 +4,21 @@
      [page :refer [html5]]
      [page :refer [include-js]]]))
 
-(defn index-page
-  ([]
-   (index-page {}))
-  ([{ username-error :username }]
-   (html5
-     [:head
+(def head
+  [:head
       [:title "Hexagon"]
       [:link {:rel "stylesheet"
               :href "https://unpkg.com/blaze"
               :crossorigin "anonymous"}]
       [:meta {:name "viewport"
-              :content "width=device-width, initial-scale=1"}]]
+              :content "width=device-width, initial-scale=1"}]])
+
+(defn index-page
+  ([]
+   (index-page {}))
+  ([{ username-error :username }]
+   (html5
+     head
      [:body.c-text
       [:h1.c-heading.u-centered "Hexagon"]
       [:div.o-container.o-container--xsmall
@@ -36,16 +39,7 @@
 
 (defn game-page []
   (html5
-    [:head
-     [:title "Hexagon"]
-     [:script {:type "text/javascript"
-               :id "lt_ws"
-               :src "http://localhost:5678/socket.io/lighttable/ws.js"}]
-     [:link {:rel "stylesheet"
-             :href "https://unpkg.com/blaze"
-             :crossorigin "anonymous"}]
-     [:meta {:name "viewport"
-             :content "width=device-width, initial-scale=1"}]]
+    head
     [:body.c-text
      [:h1 "Hexagon"]
      [:div#container]
