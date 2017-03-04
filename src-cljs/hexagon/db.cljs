@@ -34,9 +34,6 @@
 
 (def db (d/create-conn schema))
 
-(defn reset-db! []
-  (set! db (d/create-conn schema)))
-
 ;; utils
 
 (defn eid-by-av [a v]

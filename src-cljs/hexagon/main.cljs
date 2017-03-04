@@ -17,10 +17,7 @@
          (d/transact! db))))
 
 (defn init! []
-  (when-some [ws @ws/chan]
-             (do
-               (.close ws)
-               (db/reset-db!)))
+  (when-some [ws @ws/chan] (.close ws))
   (ws/make! username handle-message)
   (rum/mount (ui/root db) (js/document.querySelector "#container")))
 
