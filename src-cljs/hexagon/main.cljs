@@ -7,6 +7,8 @@
 
 (enable-console-print!)
 
+(def username (-> js/window .-__INITIAL_STATE__ .-username))
+
 (defn handle-message [msg]
   (when (= (.-type msg) "datoms")
     (->> msg
@@ -14,13 +16,12 @@
          cljs.reader/read-string
          (d/transact! db))))
 
-(defn init! [initial-state]
-  (let [username (.-username initial-state)]
-    (when-some [ws @ws/chan]
-               (do
-                 (.close ws)
-                 (db/reset-db!)))
-    (ws/make! username handle-message)
-    (rum/mount (ui/root db) (js/document.querySelector "#container"))))
+(defn init! []
+  (when-some [ws @ws/chan]
+             (do
+               (.close ws)
+               (db/reset-db!)))
+  (ws/make! username handle-message)
+  (rum/mount (ui/root db) (js/document.querySelector "#container")))
 
-(init! js/window.__INITIAL_STATE__)
+(init!)
