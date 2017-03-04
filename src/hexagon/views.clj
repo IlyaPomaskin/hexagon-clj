@@ -4,7 +4,37 @@
      [page :refer [html5]]
      [page :refer [include-js]]]))
 
-(defn index-page []
+(defn index-page
+  ([]
+   (index-page {}))
+  ([{ username-error :username }]
+   (html5
+     [:head
+      [:title "Hexagon"]
+      [:link {:rel "stylesheet"
+              :href "https://unpkg.com/blaze"
+              :crossorigin "anonymous"}]
+      [:meta {:name "viewport"
+              :content "width=device-width, initial-scale=1"}]]
+     [:body.c-text
+      [:h1.c-heading.u-centered "Hexagon"]
+      [:div.o-container.o-container--xsmall
+       [:form { :method "post"
+                :action "/" }
+        [:fieldset.o-fieldset
+         [:h3.c-heading.u-centered "Enter your username"]
+         [:div.o-form-element
+          [:input { :type "text"
+                    :name "username"
+                    :class (str "c-field"
+                                (when username-error " c-field--error"))}]
+          (when username-error
+            [:div.c-hint.c-hint--static.c-hint--error username-error])]
+         [:div.o-form-element.u-centered
+          [:input.c-button { :type "submit"
+                             :value "Login" }]]]]]])))
+
+(defn game-page []
   (html5
     [:head
      [:title "Hexagon"]
