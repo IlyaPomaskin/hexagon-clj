@@ -61,7 +61,12 @@
   [{ settings ::settings } user-eid]
   [:form { :on-submit #(do
                          (.preventDefault %1)
-                         (ws/send! ["smthing" @settings])) }
+                         (ws/send! { :type "send-invite"
+                                     :to (d/q '[:find ?v .
+                                                :in $ ?eid
+                                                :where [?eid :user/name ?v]] @db user-eid)
+                                     :game-settings { :board (:board-eid @settings)
+                                                      :owner-first-move? (:owner-first-move? @settings) } })) }
    [:fieldset.o-fieldset
     [:h3.c-heading.u-centered (str "Invite user #" user-eid)]
     (boards-select (:board-eid @settings) #(swap! settings assoc :board-eid %1))
