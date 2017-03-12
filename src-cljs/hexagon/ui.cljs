@@ -32,7 +32,10 @@
                        (user eid (= selected-user-eid eid))])
             users)])))
 
-(rum/defc boards-select [board-eid on-change]
+(rum/defc boards-select < { :init (fn [{ [eid on-change] :rum/args }]
+                                    (on-change (d/q '[:find ?v .
+                                                      :where [?e :board/name ?v]] @db))) }
+  [board-eid on-change]
   (let [boards (d/q '[:find ?e ?v
                       :where
                       [?e :board/name ?v]] @db)]
@@ -53,7 +56,7 @@
     [:.c-toggle__track [:.c-toggle__handle]]
     "Opponent first move"]])
 
-(rum/defcs game-settings < (rum/local { :board (d/q '[:find ?e . :where [?e :board/name ?v]] @db)
+(rum/defcs game-settings < (rum/local { :board-eid nil
                                         :owner-first-move? true } ::settings)
   [{ settings ::settings } user-eid]
   [:form { :on-submit #(do
