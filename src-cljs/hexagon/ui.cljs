@@ -13,11 +13,17 @@
 
 ;; user list screen
 
-(defn user [user-eid selected?]
-  (let [b (d/entity @db user-eid)]
+(rum/defc user [user-eid selected?]
+  (let [user-entity (d/entity @db user-eid)
+        invite-sent? (d/q '[:find ?e .
+                            :in $ ?to-eid ?from-eid
+                            :where [?e :invite/to ?to-eid]
+                            [?e :invite/from ?from-eid]] @db (utils/get-current-user-eid) user-eid)]
     [:div { :class (cn "c-card__item"
                        (when selected?
-                         "c-card__item--active")) } (:user/name b)]))
+                         "c-card__item--active")) }
+     [:span (:user/name user-entity)]
+     (when invite-sent? [:b "*"])]))
 
 (rum/defc users-list [selected-user-eid on-user-select]
   (let [all-users (d/q '[:find [?e ...]
