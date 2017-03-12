@@ -21,10 +21,8 @@
              (not= (name a) "channel"))
         (and (= ns-prefix "invite")
              (let [invite (db/entity-by-eid e)]
-               (or (= (:invite/from invite)
-                      user-eid)
-                   (= (:invite/to invite)
-                      user-eid))))
+               (or (= (-> invite :invite/from :db/id) user-eid)
+                   (= (-> invite :invite/to :db/id) user-eid))))
         (and (= ns-prefix "game-settings")
              (or (some? (find-invite-by :invite/from e))
                  (some? (find-invite-by :invite/to e))))
