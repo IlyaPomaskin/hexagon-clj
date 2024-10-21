@@ -10,6 +10,10 @@
 
 (defn handle-message [msg]
   (when (= (.-type msg) "datoms")
+    (cljs.pprint/pprint
+      (->> msg
+           .-payload
+           cljs.reader/read-string))
     (->> msg
          .-payload
          cljs.reader/read-string
