@@ -10,17 +10,12 @@
 
 (defn handle-message [msg]
   (when (= (.-type msg) "datoms")
-    (cljs.pprint/pprint
-      (->> msg
-           .-payload
-           cljs.reader/read-string))
-    (->> msg
-         .-payload
-         cljs.reader/read-string
-         (d/transact! db))))
+    (let [datoms (cljs.reader/read-string (.-payload msg))]
+      (cljs.pprint/pprint datoms)
+      (d/transact! db datoms))))
 
 (defn init! []
-  (when-some [ws @ws/chan] (.close ws))
+  (ws/close!)
   (ws/make! utils/current-username handle-message)
   (rum/mount (ui/root db) (js/document.querySelector "#container")))
 
