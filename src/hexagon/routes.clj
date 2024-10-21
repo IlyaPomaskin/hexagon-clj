@@ -12,31 +12,39 @@
 (defn validate-form [form]
   (let [username (get form "username")]
     (cond
-      (string/blank? username) { :username "Enter username" }
-      (user/exists? username) { :username "Username already used" }
+      (string/blank? username) {:username "Enter username"}
+      (user/exists? username) {:username "Username already used"}
       :else nil)))
 
-(defn authorize [{ form :form-params }]
-  (if-let [errors (validate-form form)]
-    (view/index-page errors)
-    (view/game-page form)))
+; FIXME restore username validation
+(defn authorize [{params :query-params}]
+  (if-let [errors (validate-form params)]
+    ;(view/index-page errors)
+    (view/game-page)))
 
 (defroutes main-routes
-  (context "/" []
            (GET "/" [] (view/index-page))
-           (POST "/" [] authorize))
-  (GET "/ws" request (ws/ws-handler request))
-  (route/resources "/")
-  (route/not-found "Page not found"))
+           (GET "/game" [] (view/game-page))
+           (GET "/ws" request (ws/ws-handler request))
+           (route/resources "/")
+           (route/not-found "Page not found"))
 
 (def app
   (-> (handler/site main-routes)
       (wrap-base-url)))
 
-(defonce server (atom (run-server app { :port 8080 })))
+(defonce server (atom nil))
+
+(defn start-server []
+  (when (nil? @server)
+    (reset! server (run-server app {:port 8080}))))
 
 (defn stop-server []
   (when-not (nil? @server)
     (reset! server nil)))
+
+(defn restart-server []
+  (stop-server)
+  (start-server))
 
 (defn -main [] (println "Started"))

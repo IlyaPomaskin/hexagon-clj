@@ -3,9 +3,9 @@
             [hexagon.db :as db :refer [db]]))
 
 (def current-username
-  (-> js/window
-      .-__INITIAL_STATE__
-      .-username))
+  (let [search (-> js/document .-location .-search)
+        search-params (js/URLSearchParams. search)]
+    (.get search-params "username")))
 
 (defn get-current-user-eid []
   (d/q '[:find ?e .

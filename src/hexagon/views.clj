@@ -31,8 +31,8 @@
      head
      (body
        [:div.o-container.o-container--xsmall
-        [:form { :method "post"
-                 :action "/" }
+        [:form { :method "get"
+                 :action "/game" }
          [:fieldset.o-fieldset
           [:h3.c-heading.u-centered "Enter your username"]
           [:div.o-form-element
@@ -46,11 +46,9 @@
            [:input.c-button { :type "submit"
                               :value "Login" }]]]]]))))
 
-(defn game-page [initial-state]
+(defn game-page []
   (html5
     head
     (body
       [:div#container]
-      [:script { :type "text/javascript" }
-       (str "window.__INITIAL_STATE__ = " (str (json/encode initial-state)) ";")]
       (include-js "/js/main.js"))))
