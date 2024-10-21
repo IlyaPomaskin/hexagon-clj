@@ -8,11 +8,8 @@
 (def head
   [:head
    [:title "Hexagon"]
-   [:script { :type "text/javascript"
-              :id "lt_ws"
-              :src "http://localhost:5678/socket.io/lighttable/ws.js" }]
    [:link { :rel "stylesheet"
-            :href "https://unpkg.com/blaze"
+            :href "https://unpkg.com/blaze@2"
             :crossorigin "anonymous" }]
    [:meta { :name "viewport"
             :content "width=device-width, initial-scale=1" }]])
