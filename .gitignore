@@ -1,5 +1,5 @@
 *.log
-/resources
+/resources/public/js
 /target
 /classes
 /checkouts
@@ -11,3 +11,5 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+.idea
+hexagon.iml
